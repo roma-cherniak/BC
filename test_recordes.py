@@ -5,7 +5,7 @@ import base64
 import gzip
 import csv 
 import time
-
+from find_gap import find_gap
 
 
 sio = socketio.Server()
@@ -33,7 +33,7 @@ def read_laser(data):
 
 
 
-@sio.on("Bridge")                                  # BLANK 1
+@sio.on("Bridge")                                  
 def bridge(sid, data):
     global packets , episod
     packets = packets + 1
@@ -41,16 +41,18 @@ def bridge(sid, data):
     steering = 0
     episod
     ranges = read_laser(data)
-    if packets == 1:
-        print('The game sends these drawers:', list(data.keys()))   # BLANK 2
 
-    if packets % 60 == 0:                            # BLANK 3
+
+    if packets == 1:
+        print('The game sends these drawers:', list(data.keys()))   # Send info about what data packets contain 
+
+    if packets % 60 == 0:                            
         print('speed:', data['V1 Speed'])
 
         print('beams:', len(ranges),
-              ' right:', ranges[180],      # BLANK: beam number for right
-              ' front:', ranges[540],      # BLANK: beam number for front
-              ' left:', ranges[900])       # BLANK: beam number for left
+              ' right:', ranges[180],      
+              ' front:', ranges[540],      
+              ' left:', ranges[900])       
         print(data['V1 Collisions'])
 
 
@@ -59,16 +61,6 @@ def bridge(sid, data):
         reset = "True"
         episod += 1
 
-
-    if ranges[180] < 0.5:
-        steering = 0.5
-    elif ranges[900] < 0.5:
-        steering = -0.5
-    elif ranges[540] < 0.5:
-        if ranges[180] < ranges[900]:
-            steering = 0.8
-        else:
-            steering = -0.8
 
 
     if packets < 11800:
@@ -81,20 +73,19 @@ def bridge(sid, data):
         reset = "True"
         episod += 1
 
-
+    
 
     if packets % 6 == 0 :
 
         writer.writerow([episod, round(time.time(), 3), data['V1 Speed'],throttle ,steering ,
                   ranges[180], ranges[540],  ranges[900],data['V1 Collisions'] ])
         log_file.flush()
-
+        
         print(episod)
 
 
 
-    # politely answer "do nothing": no gas, no steering, no reset
-    sio.emit('Bridge', data={'V1 Throttle': str(throttle) , 'V1 Steering': str(steering), 'Reset': str(reset)})
+    sio.emit('Bridge', data={'V1 Throttle': str(throttle) , 'V1 Steering': find_gap(ranges), 'Reset': str(reset)})
 
 
 print('Door is open, waiting for the game...')
