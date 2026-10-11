@@ -11,10 +11,13 @@ import random
 
 sio = socketio.Server()
 
+
 log_file = open('my_drive.csv', 'w', newline='') 
 writer = csv.writer(log_file)                         # a helper that writes CSV rows for us
 writer.writerow(['episode', 'time', 'speed', 'throttle', 'steering',
                  'right', 'front', 'left', 'collisions', 'global_timer'])      # the header row: column names
+
+
 packets = 0                                   # counter: how many messages so far
 episod = 0
 waiting = 0
@@ -25,9 +28,20 @@ throttle = random.uniform(0.03 , 0.1)
 r_steering = 0
 random_steering = 0
 
+
+WAIT_AFTER_TIMEOUT = 120
+WAIT_AFTER_CRASH = 60
+EPISODE_TIME = 30   
+BRAKE_TIME = 28  
+RECORD_STEP = 0.05  
+THROTTLE_MIN = 0.03
+THROTTLE_MAX = 0.1
+STEERING_NOISE = 0.3
+
 @sio.on('connect')
 def connect(sid, environ):
     print('Connected! Caller ID:', sid)
+
 
 def read_laser(data):
     packed = data['V1 LIDAR Range Array']                        # the zipped text
@@ -38,7 +52,6 @@ def read_laser(data):
 def send_every_60_packets(data, ranges):
 
     print('speed:', data['V1 Speed'])
-    
     print('beams:', len(ranges),
                   ' right:', ranges[180],      
                   ' front:', ranges[540],      
@@ -46,98 +59,86 @@ def send_every_60_packets(data, ranges):
     print(data['V1 Collisions'])
 
 
-
-
-
-@sio.on("Bridge")                                  
-def bridge(sid, data):
-    global packets , episod, waiting, global_timer, lap_timer, next_write, throttle, r_steering, random_steering
-    packets = packets + 1
-    reset = "False"
-
-    if packets == 1:
-        global_timer = 0
-        next_write = 0.0
-        reset = "True"
-        waiting = 120
-        episod += 1
-        throttle = random.uniform(0.03 , 0.1)
-        r_steering = 0
-    
-    ranges = read_laser(data)
-
-    if packets % 60 == 0:                            
-        send_every_60_packets(data, ranges)
-
-
-
-
-
-    
-
-    episod_time = float(data['V1 Lap Time'])
+def clock(episod_time):
+    global lap_timer , global_timer
     if lap_timer < episod_time :
         global_timer += episod_time - lap_timer
         lap_timer = episod_time
     elif lap_timer > episod_time :
         lap_timer = episod_time
-        global_timer += episod_time
+        global_timer += episod_time    
 
 
-
-
-    if global_timer > 28:   # time that car gonna  move forward 
-        throttle = 0
-
-    if global_timer  >= 30:
+def start_new_episod(wait):
+        
+        global global_timer, next_write, waiting, episod, throttle, r_steering
         global_timer = 0
         next_write = 0.0
-        reset = "True"
-        waiting = 120
+        waiting = wait
         episod += 1
-        throttle = random.uniform(0.03 , 0.1)
+        throttle = random.uniform(THROTTLE_MIN, THROTTLE_MAX)
         r_steering = 0
+        return 'True'
 
 
-    
-    steering  = find_gap(ranges)
-
+def add_steering_noise(steering):
+    global global_timer, r_steering, random_steering
     if global_timer > r_steering :
-        random_steering = random.uniform(-0.3 , 0.3)
+        random_steering = random.uniform(-STEERING_NOISE , STEERING_NOISE)
         r_steering += random.uniform(0.3 , 2)
 
 
     steering = steering + random_steering
-    steering = max(-1, min(1, steering))
+    return max(-1, min(1, steering))
 
-    if waiting == 0 and int(data['V1 Collisions']) > 0:
-        writer.writerow([episod, round(time.time(), 3), data['V1 Speed'], throttle, steering,
-                         ranges[180], ranges[540], ranges[900], data['V1 Collisions'], global_timer])
-        log_file.flush()
 
-        global_timer = 0
-        next_write = 0.0
-        reset = "True"
-        waiting = 60
-        episod += 1
-        throttle = random.uniform(0.03, 0.1)
-        r_steering = 0
+def write_row(data, ranges, noise_steering):
+    writer.writerow([episod, round(time.time(), 3), data['V1 Speed'],throttle ,noise_steering ,
+            ranges[180], ranges[540],  ranges[900],data['V1 Collisions'], global_timer ])
+    log_file.flush()
 
-    if waiting > 0:
+
+@sio.on("Bridge")                                  
+def bridge(sid, data):
+
+    global packets , waiting,  next_write, throttle
+    packets = packets + 1
+    reset = "False"
+
+    ranges = read_laser(data)
+
+    if packets == 1:   # Clear all data that was before
+        reset = start_new_episod(WAIT_AFTER_TIMEOUT)
+    if packets % 60 == 0:                  # Send info message every 60 packets           
+        send_every_60_packets(data, ranges)
+
+    clock(float(data['V1 Lap Time']))
+
+    # time that car gonna  move forward
+    if global_timer > BRAKE_TIME:    
+        throttle = 0
+    if global_timer  >= EPISODE_TIME:
+        reset = start_new_episod(WAIT_AFTER_TIMEOUT)
+
+    # steering angle with noise 
+    steering  = add_steering_noise(find_gap(ranges))   
+
+    #  When collision happen write that in csv file and restart game
+    if waiting == 0 and int(data['V1 Collisions']) > 0:  
+        write_row(data, ranges, steering)
+        reset = start_new_episod(WAIT_AFTER_CRASH)
+
+    # Wait calculate
+    if waiting > 0:   
         waiting -= 1
         next_write = global_timer
 
-    
-
+    # write new row to csv file every RECORD_STEP seconds 
     if global_timer > next_write and waiting  == 0:
+        write_row(data, ranges, steering)
+        next_write += RECORD_STEP
 
-        writer.writerow([episod, round(time.time(), 3), data['V1 Speed'],throttle ,steering ,
-                  ranges[180], ranges[540],  ranges[900],data['V1 Collisions'], global_timer ])
-        log_file.flush()
-        next_write += 0.05
-
-
-
+    # Send my throttle and steering to the simulator
     sio.emit('Bridge', data={'V1 Throttle': str(throttle) , 'V1 Steering': str(steering) , 'Reset': str(reset)})
 
 
