@@ -6,7 +6,6 @@ import gzip
 import csv 
 import time
 from find_gap import find_gap
-import time
 import random 
 
 
@@ -55,8 +54,15 @@ def bridge(sid, data):
     global packets , episod, waiting, global_timer, lap_timer, next_write, throttle, r_steering, random_steering
     packets = packets + 1
     reset = "False"
-    steering = 0
-    episod
+
+    if packets == 1:
+        global_timer = 0
+        next_write = 0.0
+        reset = "True"
+        waiting = 120
+        episod += 1
+        throttle = random.uniform(0.03 , 0.1)
+        r_steering = 0
     
     ranges = read_laser(data)
 
@@ -64,15 +70,7 @@ def bridge(sid, data):
         send_every_60_packets(data, ranges)
 
 
-    if int(data['V1 Collisions'])  > 0: 
-        global_timer = 0
-        next_write = 0.0
-        packets = 0
-        reset = "True"
-        waiting =  60
-        episod += 1
-        throttle = random.uniform(0.03 , 0.1)
-        r_steering = 0
+
 
 
     
@@ -94,7 +92,6 @@ def bridge(sid, data):
     if global_timer  >= 30:
         global_timer = 0
         next_write = 0.0
-        packets = 0
         reset = "True"
         waiting = 120
         episod += 1
@@ -113,8 +110,24 @@ def bridge(sid, data):
     steering = steering + random_steering
     steering = max(-1, min(1, steering))
 
+    if waiting == 0 and int(data['V1 Collisions']) > 0:
+        writer.writerow([episod, round(time.time(), 3), data['V1 Speed'], throttle, steering,
+                         ranges[180], ranges[540], ranges[900], data['V1 Collisions'], global_timer])
+        log_file.flush()
+
+        global_timer = 0
+        next_write = 0.0
+        reset = "True"
+        waiting = 60
+        episod += 1
+        throttle = random.uniform(0.03, 0.1)
+        r_steering = 0
+
     if waiting > 0:
         waiting -= 1
+        next_write = global_timer
+
+    
 
     if global_timer > next_write and waiting  == 0:
 
