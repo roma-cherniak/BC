@@ -7,3 +7,11 @@ V1 Lap Time - on this make the counter
 
 
 task for today make alg that gonna fill the gap!!
+
+
+max_speed = 0.093 
+
+
+added noise to file 
+make normal timer 
+write csv

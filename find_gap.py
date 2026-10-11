@@ -59,15 +59,17 @@ def find_gap(ranges):   # ranges has type list
 
 
 
+
+
     SIDE_LIMIT = 0.35                            # if wall is near from side just move forward
     right_side = min(ranges[90:300])           
     left_side = min(ranges[780:990])          
     if steering_angle < 0 and right_side < SIDE_LIMIT:
         steering_angle = 0                    
     if steering_angle > 0 and left_side < SIDE_LIMIT:
-        steering_angle = 0                    
+        steering_angle = 0          
 
 
-    return str(steering_angle)   
+    return steering_angle   
 
 
