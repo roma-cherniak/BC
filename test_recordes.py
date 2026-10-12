@@ -6,6 +6,7 @@ import gzip
 import csv 
 import time
 from find_gap import find_gap
+from lidar_collection import save_npz
 import random 
 
 
@@ -27,6 +28,12 @@ next_write = 0.0
 throttle = random.uniform(0.03 , 0.1)
 r_steering = 0
 random_steering = 0
+
+ranges_list = []
+speed_list = []
+throttle_list = []
+steering_list = []
+time_list = []
 
 
 WAIT_AFTER_TIMEOUT = 120
@@ -71,7 +78,19 @@ def clock(episod_time):
 
 def start_new_episod(wait):
         
-        global global_timer, next_write, waiting, episod, throttle, r_steering
+        global global_timer, next_write, waiting, episod, throttle, r_steering 
+        global ranges_list, speed_list, throttle_list, steering_list, time_list
+
+        if len(ranges_list) > 0:
+            save_npz(ranges_list, speed_list, time_list, steering_list, throttle_list, episod)
+
+        ranges_list.clear()
+        speed_list.clear()
+        time_list.clear()
+        steering_list.clear()
+        throttle_list.clear()
+
+
         global_timer = 0
         next_write = 0.0
         waiting = wait
@@ -93,6 +112,15 @@ def add_steering_noise(steering):
 
 
 def write_row(data, ranges, noise_steering):
+
+    global ranges_list, speed_list, throttle_list, steering_list, time_list
+
+    ranges_list.append(ranges)
+    speed_list.append(float(data['V1 Speed']))
+    throttle_list.append(throttle)
+    steering_list.append(noise_steering)
+    time_list.append(global_timer)
+
     writer.writerow([episod, round(time.time(), 3), data['V1 Speed'],throttle ,noise_steering ,
             ranges[180], ranges[540],  ranges[900],data['V1 Collisions'], global_timer ])
     log_file.flush()
@@ -101,13 +129,14 @@ def write_row(data, ranges, noise_steering):
 @sio.on("Bridge")                                  
 def bridge(sid, data):
 
-    global packets , waiting,  next_write, throttle
+    global packets , waiting,  next_write, throttle, lap_timer
     packets = packets + 1
     reset = "False"
 
     ranges = read_laser(data)
 
     if packets == 1:   # Clear all data that was before
+        lap_timer = float(data['V1 Lap Time'])
         reset = start_new_episod(WAIT_AFTER_TIMEOUT)
     if packets % 60 == 0:                  # Send info message every 60 packets           
         send_every_60_packets(data, ranges)
