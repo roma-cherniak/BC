@@ -34,15 +34,16 @@ speed_list = []
 throttle_list = []
 steering_list = []
 time_list = []
+colisions_list = []
 
 
-WAIT_AFTER_TIMEOUT = 120
-WAIT_AFTER_CRASH = 60
+WAIT_MIN = 60
+WAIT_MAX = 1200
 EPISODE_TIME = 30   
 BRAKE_TIME = 28  
 RECORD_STEP = 0.05  
 THROTTLE_MIN = 0.03
-THROTTLE_MAX = 0.1
+THROTTLE_MAX = 0.93
 STEERING_NOISE = 0.3
 
 @sio.on('connect')
@@ -59,11 +60,7 @@ def read_laser(data):
 def send_every_60_packets(data, ranges):
 
     print('speed:', data['V1 Speed'])
-    print('beams:', len(ranges),
-                  ' right:', ranges[180],      
-                  ' front:', ranges[540],      
-                  ' left:', ranges[900])       
-    print(data['V1 Collisions'])
+    print(f"time - {global_timer}")
 
 
 def clock(episod_time):
@@ -79,16 +76,23 @@ def clock(episod_time):
 def start_new_episod(wait):
         
         global global_timer, next_write, waiting, episod, throttle, r_steering 
-        global ranges_list, speed_list, throttle_list, steering_list, time_list
+        global ranges_list, speed_list, throttle_list, steering_list, time_list, colisions_list
 
         if len(ranges_list) > 0:
-            save_npz(ranges_list, speed_list, time_list, steering_list, throttle_list, episod)
+            save_npz(ranges_list, 
+                     speed_list, 
+                     time_list, 
+                     steering_list, 
+                     throttle_list, 
+                     episod,
+                     colisions_list)
 
         ranges_list.clear()
         speed_list.clear()
         time_list.clear()
         steering_list.clear()
         throttle_list.clear()
+        colisions_list.clear()
 
 
         global_timer = 0
@@ -113,13 +117,15 @@ def add_steering_noise(steering):
 
 def write_row(data, ranges, noise_steering):
 
-    global ranges_list, speed_list, throttle_list, steering_list, time_list
+    global ranges_list, speed_list, throttle_list, steering_list, time_list, colisions_list 
 
     ranges_list.append(ranges)
     speed_list.append(float(data['V1 Speed']))
     throttle_list.append(throttle)
     steering_list.append(noise_steering)
     time_list.append(global_timer)
+    colisions_list.append(int(data['V1 Collisions']))
+
 
     writer.writerow([episod, round(time.time(), 3), data['V1 Speed'],throttle ,noise_steering ,
             ranges[180], ranges[540],  ranges[900],data['V1 Collisions'], global_timer ])
@@ -129,40 +135,47 @@ def write_row(data, ranges, noise_steering):
 @sio.on("Bridge")                                  
 def bridge(sid, data):
 
-    global packets , waiting,  next_write, throttle, lap_timer
+    global packets , waiting,  next_write, throttle, lap_timer, global_timer
     packets = packets + 1
     reset = "False"
 
     ranges = read_laser(data)
+    if packets % 60 == 0:
+        send_every_60_packets(data, ranges)
 
     if packets == 1:   # Clear all data that was before
         lap_timer = float(data['V1 Lap Time'])
-        reset = start_new_episod(WAIT_AFTER_TIMEOUT)
-    if packets % 60 == 0:                  # Send info message every 60 packets           
-        send_every_60_packets(data, ranges)
+        reset = start_new_episod(random.randint(WAIT_MIN,WAIT_MAX))
 
     clock(float(data['V1 Lap Time']))
 
-    # time that car gonna  move forward
-    if global_timer > BRAKE_TIME:    
+    if global_timer > BRAKE_TIME and waiting == 0:    
         throttle = 0
-    if global_timer  >= EPISODE_TIME:
-        reset = start_new_episod(WAIT_AFTER_TIMEOUT)
+    if global_timer  >= EPISODE_TIME and waiting == 0:
+        reset = start_new_episod(random.randint(WAIT_MIN,WAIT_MAX))
 
-    # steering angle with noise 
     steering  = add_steering_noise(find_gap(ranges))   
 
-    #  When collision happen write that in csv file and restart game
+
+
     if waiting == 0 and int(data['V1 Collisions']) > 0:  
         write_row(data, ranges, steering)
-        reset = start_new_episod(WAIT_AFTER_CRASH)
+        reset = start_new_episod(random.randint(WAIT_MIN,WAIT_MAX) )
 
-    # Wait calculate
-    if waiting > 0:   
+    elif waiting > 0 and int(data['V1 Collisions']) > 0:
+        reset = "True"
+        waiting = random.randint(WAIT_MIN, WAIT_MAX)
+
+
+    if waiting > 1:   
         waiting -= 1
-        next_write = global_timer
 
-    # write new row to csv file every RECORD_STEP seconds 
+    if waiting == 1:
+        global_timer = 0
+        next_write = 0
+        waiting -= 1
+
+
     if global_timer > next_write and waiting  == 0:
         write_row(data, ranges, steering)
         next_write += RECORD_STEP

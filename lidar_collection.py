@@ -3,14 +3,16 @@
 
 import numpy as np
 
-
-def save_npz(ranges,speed_list,time_list, noise_steering , my_throttle, episod):
-    np.savez_compressed(f"data/drive_{episod:04d}.npz", 
+# DATA_DIR - directory in what save datset
+DATA_DIR = "data/clean_practice"
+def save_npz(ranges,speed_list,time_list, noise_steering , my_throttle, episod, collisions):
+    np.savez_compressed(f"{DATA_DIR}/drive_{episod:04d}.npz", 
                         lidar = np.array(ranges, dtype = np.float16), 
                         throttle = my_throttle,
                         steering = noise_steering,
                         speed = speed_list,
-                        time = time_list
+                        time = time_list,
+                        collisions = collisions
                         )
 
 def show_npz(episod):
