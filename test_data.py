@@ -108,7 +108,7 @@ def check_sensors(d, reason):
     if not_jpeg > 0:
         problems.append(f"{not_jpeg} images are not JPEG")
     o = d["orientation"]
-    if o.min() < 0 or o.max() > 2 * np.pi + 0.01:
+    if o.min() < -0.01 or o.max() > 2 * np.pi + 0.01:   # -0.001 happens near the 0/6.28 wrap - that's fine
         problems.append(f"orientation {o.min():.2f}..{o.max():.2f} is outside 0..6.28")
     jumps = np.linalg.norm(np.diff(d["position"], axis=0), axis=1)
     if reason == "crash":
@@ -132,7 +132,10 @@ def check_file(path):
         return problems, None
     reason = str(d["reason"])
     problems = check_time(d) + check_end(d, reason) + check_actions(d) + check_sensors(d, reason)
-    speed = d["speed"][d["time"] <= BRAKE_TIME]              # only while driving, the brake stops the car
+    driving = d["time"] <= BRAKE_TIME                        # only while driving, the brake stops the car
+    if reason == "crash":
+        driving[-1] = False                                  # the car stands at the wall on the crash row
+    speed = d["speed"][driving]
     if len(speed) == 0:
         speed = d["speed"]
     info = {"rows": len(d["time"]),
