@@ -165,9 +165,6 @@ def write_row(data, ranges, noise_steering):
 
 
 
-    # writer.writerow([episod, round(time.time(), 3), data['V1 Speed'],throttle ,noise_steering ,
-    #         ranges[180], ranges[540],  ranges[900],data['V1 Collisions'], global_timer ])
-    # log_file.flush()
 
 
 @sio.on("Bridge")                                  
