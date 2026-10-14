@@ -4,7 +4,7 @@
 import glob
 import os
 import numpy as np
-from lidar_collection import DATA_DIR
+from data_colection.lidar_collection import DATA_DIR
 
 # must match test_recordes.py (copied, because importing it would start the server)
 EPISODE_TIME = 30

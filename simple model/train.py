@@ -6,7 +6,7 @@ import csv
 DEVICE = "cuda" 
 BATCH = 256
 LR = 0.001
-EPOCHS = 20
+EPOCHS = 40
 
 
 log_file = open('loss.csv', 'w', newline='') 

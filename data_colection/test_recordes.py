@@ -5,18 +5,12 @@ import base64
 import gzip
 import csv 
 import time
-from find_gap import find_gap
-from lidar_collection import save_npz
+from data_colection.find_gap import find_gap
+from data_colection.lidar_collection import save_npz
 import random 
 
 
 sio = socketio.Server()
-
-
-# log_file = open('my_drive.csv', 'w', newline='') 
-# writer = csv.writer(log_file)                         # a helper that writes CSV rows for us
-# writer.writerow(['episode', 'time', 'speed', 'throttle', 'steering',
-#                  'right', 'front', 'left', 'collisions', 'global_timer'])      # the header row: column names
 
 
 packets = 0                                   # counter: how many messages so far
