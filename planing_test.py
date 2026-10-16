@@ -11,7 +11,7 @@ d = np.load("data/test_pairs.npz")
 lidar_now = torch.from_numpy(d["lidar_now"]).float()
 action = torch.from_numpy(d["act"]).float()
 speed = torch.from_numpy(d["spd"]).float()[:, None]
-lidar_next = torch.from_numpy(d["lidar_next"]).float()
+
 
 
 

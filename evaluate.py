@@ -45,5 +45,3 @@ def show_loss():
     print(f"Test loss = {loss:.4} , copy_loss = {copy_loss:.4}")
 
 
-
-show_graph(2019)
