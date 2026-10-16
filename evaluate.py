@@ -14,10 +14,12 @@ lidar_next = torch.from_numpy(d["lidar_next"]).float()
     
 model = NeuralModel()
 model.load_state_dict(torch.load("model.pt", map_location="cpu"))
-def show_graph(moment):
+def show_graph(moment , guess = None):
     i = moment
-    with torch.no_grad():
-        guess = model(lidar_now[i : i+1], action[i : i+1], speed[i : i+1])[0]
+
+    if guess is None:
+        with torch.no_grad():
+            guess = model(lidar_now[i : i+1], action[i : i+1], speed[i : i+1])[0]
 
 
     angles = np.linspace(-135, 135, 271)
@@ -42,4 +44,6 @@ def show_loss():
 
     print(f"Test loss = {loss:.4} , copy_loss = {copy_loss:.4}")
 
-show_loss()
+
+
+show_graph(2019)
