@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import torch 
 
 guess = 0
-seconds = 2 * 20  # one second is 20 
+seconds = 1 * 20  # one second is 20 
 
 
 d = np.load("data/test_pairs.npz")
@@ -18,7 +18,7 @@ speed = torch.from_numpy(d["spd"]).float()[:, None]
 model = NeuralModel()
 model.load_state_dict(torch.load("model.pt", map_location="cpu"))
 
-start = 4340
+start = 4000
 
 
 def show_graph(r_start, r_end , guess):
@@ -35,7 +35,7 @@ def show_graph(r_start, r_end , guess):
     plt.xlabel("angle (degrees, + = left)")
     plt.ylabel("distance (m)")
     plt.legend()
-    plt.savefig("guess.png")
+    plt.savefig("rollout_example.png")
     plt.show()
 
 

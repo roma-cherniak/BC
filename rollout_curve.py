@@ -35,7 +35,7 @@ for i in range(len(same) - STEPS):
 random.seed(0)
 starts = random.sample(safe, 500)              
 starts = torch.tensor(starts)                   
-print(starts[:10], len(starts))
+
 
 
 

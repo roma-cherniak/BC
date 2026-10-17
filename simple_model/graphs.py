@@ -15,6 +15,7 @@ ax.set_xlabel("Epochs")
 ax.set_ylabel("Loss")
 ax.set_title("Training results")
 ax.grid()
+plt.savefig("loss.png")
 plt.show()
 
   
