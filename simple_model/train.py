@@ -67,9 +67,9 @@ for epoch in range(EPOCHS):
     loss = train_one_epoch(train)
     v = val_loss(val)
     if v < best :
-        best = v
-        torch.save(model.state_dict(), "model.pt")
-        print("model saved")
+            best = v
+            torch.save(model.state_dict(), "model.pt")
+            print("model saved")
     print(f"epoch {epoch}  train {loss:.7f}  val {v:.7f}  val/copy {v / 0.0006847:.2f}")
     print(f"time - {time.time() - t0:.0f}")
     writer.writerow([epoch, loss, v])
