@@ -3,18 +3,19 @@ import torch
 from jepa_model import Encoder, Predictor
 import time
 import csv
-
+from sigreg import sigreg
 
 
 DEVICE = "cuda" 
 BATCH = 256
 LR = 0.001
 EPOCHS = 10
+SIGREG_WEIGHT = 0.09
 
 
 log_file = open('jepa_loss.csv', 'w', newline='') 
 writer = csv.writer(log_file)                         # a helper that writes CSV rows for us
-writer.writerow(['epoch', 'train_loss', 'val_loss', 'spread', 'copy_loss'])      # the header row: column names
+writer.writerow(['epoch', 'train_loss', 'val_loss', 'spread', 'copy_loss', 'sigreg'])      # the header row: column names
 
 
 
@@ -43,18 +44,24 @@ def train_one_epoch(data):
     lidar_now, action, speed, lidar_next = data
     order = torch.randperm(len(lidar_now), device=DEVICE)
     total = 0
+    total_reg = 0
+    number_of_batches = 0
     for start in range(0, len(order), BATCH):
         idx = order[start : start + BATCH]
         latent_now = encoder(lidar_now[idx].float())   
         latent_next = encoder(lidar_next[idx].float())
+        reg = (sigreg(latent_now) + sigreg(latent_next)) / 2
         guess = predictor(latent_now, action[idx].float(), speed[idx].float())
-        loss = ((guess - latent_next) ** 2).mean() 
+        loss = (((guess - latent_next) ** 2).mean())
+        sig_loss = loss + SIGREG_WEIGHT * reg 
         optimizer.zero_grad()   
-        loss.backward()
+        sig_loss.backward()
         optimizer.step()
 
-        total += loss.item() * len(idx)                     
-    return total / len(order) 
+        total += loss.item() * len(idx)   
+        total_reg += reg.item() 
+        number_of_batches += 1
+    return total / len(order), total_reg / number_of_batches
 
 
 
@@ -84,15 +91,15 @@ def val_loss(data):
 best = 1
 for epoch in range(EPOCHS):
     t0 = time.time()
-    loss = train_one_epoch(train)
+    loss, sigloss = train_one_epoch(train)
     v_loss, copy_loss, spread = val_loss(val)
 
     torch.save(predictor.state_dict(), "jepa_predoctor.pt")
     torch.save(encoder.state_dict(), "jepa_encoder.pt")
     print("model saved")
-    print(f"epoch {epoch}  train {loss:.7f}  val {v_loss:.7f} spread {spread:.7} copy_loss {copy_loss:.7}")
+    print(f"epoch {epoch}  train {loss:.7f}  val {v_loss:.7f} spread {spread:.7} copy_loss {copy_loss:.7} sigloss {sigloss}")
     print(f"time - {time.time() - t0:.0f}")
-    writer.writerow([epoch, loss, v_loss,spread, copy_loss])
+    writer.writerow([epoch, loss, v_loss,spread, copy_loss,sigloss])
     log_file.flush()
 
                  
