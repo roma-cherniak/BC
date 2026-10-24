@@ -13,13 +13,13 @@ random_steering = 0
 THROTTLE_MIN = 0.03
 THROTTLE_MAX = 0.09
 THROTTLE_HOLD = (1, 3)          # s, one throttle value is kept this long
-COAST_SHARE = 0.15              # sometimes throttle 0 -> the car slows down
+COAST_SHARE = 0              # sometimes throttle 0 -> the car slows down
 MODE_HOLD = (2, 5)              # s, one driving mode is kept this long
 RANDOM_SHARE = 0.6              # how often the "random" mode is chosen (else "gap")
 RANDOM_HOLD = (0.2, 1.2)        # s, one random steering value is kept this long
-SAFE_FRONT = 0.9                # m, wall closer than this in front (±20°) -> safety
+SAFE_FRONT = 0.75                # m, wall closer than this in front (±20°) -> safety
 SAFE_AROUND = 0.3               # m, wall closer than this anywhere in ±90° -> safety
-SAFETY_TIME = 0.5               # s, safety keeps driving this long after the danger
+SAFETY_TIME = 0.5              # s, safety keeps driving this long after the danger
 SAFETY_THROTTLE = 0.04          # slow down while saving the car
 
 last_time = 0
