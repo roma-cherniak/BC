@@ -5,8 +5,8 @@ import base64
 import gzip
 import csv 
 import time
-from data_colection.find_gap import find_gap
-from data_colection.lidar_collection import save_npz
+from data_collection.find_gap import find_gap
+from data_collection.lidar_collection import save_npz
 import random 
 
 
