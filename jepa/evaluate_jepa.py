@@ -63,14 +63,15 @@ def probe_r2(encoder):
         lazy_guess = targets.mean(dim=0)
         lazy_error = ((lazy_guess - targets_t) ** 2).mean(dim=0)
         zond_error = ((zond_guess - targets_t) ** 2).mean(dim=0)
-        return 1 - zond_error / lazy_error
+        return 1 - zond_error / lazy_error , zond
 
 
 model = Encoder().to(DEVICE)
 model.load_state_dict(torch.load("jepa_encoder.pt", map_location = DEVICE))
 
-r2_trained = probe_r2(model)
-r2_random = probe_r2(Encoder().to(DEVICE))            # control: the same blueprint, random knobs
+r2_trained, train_zond = probe_r2(model)
+torch.save(train_zond.state_dict(), "zond.pt")
+r2_random, random_zond = probe_r2(Encoder().to(DEVICE))            # control: the same blueprint, random knobs
 
 print(f"{'fact':<10}{'trained':>10}{'random':>10}")
 for name, a, b in zip(FACTS, r2_trained, r2_random):
