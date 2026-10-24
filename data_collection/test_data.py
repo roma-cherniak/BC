@@ -5,14 +5,14 @@ import glob
 import os
 import numpy as np
 from data_collection.lidar_collection import DATA_DIR
+from data_collection.policy import THROTTLE_MIN, THROTTLE_MAX
 
-# must match test_recordes.py (copied, because importing it would start the server)
+# must match collection_random.py (copied, because importing it would start the server)
 EPISODE_TIME = 30
 BRAKE_TIME = 28
-THROTTLE_MIN = 0.03
-THROTTLE_MAX = 0.09
 WAIT_MIN = 60
 WAIT_MAX = 1200
+MODES = ("random", "gap", "safety")   # who steered (policy.py)
 
 BEAMS = 1081            # lidar beams in one scan
 MAX_STEER_RAD = 0.5236  # full steering (30 degrees) in radians
@@ -23,7 +23,7 @@ MAX_SPEED = 5           # m/s, our car never drives faster
 SHORT_ROWS = 20         # episodes shorter than this (1 s) are "very short"
 
 ROW_KEYS = ["lidar", "throttle", "steering", "speed", "time", "collisions", "image",
-            "position", "orientation", "yaw_rate", "real_steering"]          # one value per row
+            "position", "orientation", "yaw_rate", "real_steering", "mode"]  # one value per row
 EPISODE_KEYS = ["track", "reason", "warmup"]                                 # one value per file
 
 
@@ -38,7 +38,7 @@ def check_shapes(d):
     if d["position"].shape[1:] != (2,):
         problems.append(f"position shape {d['position'].shape}")
     for k in ROW_KEYS:
-        if k != "image" and np.isnan(d[k].astype(float)).any():
+        if k not in ("image", "mode") and np.isnan(d[k].astype(float)).any():
             problems.append(f"{k} has NaN")
     return problems
 
@@ -84,17 +84,18 @@ def check_actions(d):
     t, throttle = d["time"], d["throttle"]
     driving = throttle[t <= BRAKE_TIME]
     braking = throttle[t > BRAKE_TIME]
-    if len(driving) > 0:
-        if not THROTTLE_MIN <= driving[0] <= THROTTLE_MAX:
-            problems.append(f"throttle {driving[0]:.3f} is outside {THROTTLE_MIN}..{THROTTLE_MAX}")
-        if (driving != driving[0]).any():
-            problems.append("throttle changes inside the episode")
+    ok = (driving == 0) | ((driving >= THROTTLE_MIN) & (driving <= THROTTLE_MAX))     # 0 = coasting
+    if not ok.all():
+        problems.append(f"throttle outside 0 or {THROTTLE_MIN}..{THROTTLE_MAX}")
     if (braking != 0).any():
         problems.append("throttle is not 0 after the brake time")
     if np.abs(d["steering"]).max() > 1:
         problems.append("steering is outside -1..1")
     if np.abs(d["real_steering"]).max() > MAX_STEER_RAD + 0.01:
         problems.append("real_steering is bigger than 30 degrees")
+    unknown = set(d["mode"].tolist()) - set(MODES)
+    if unknown:
+        problems.append(f"unknown mode {unknown}")
     return problems
 
 
@@ -140,9 +141,12 @@ def check_file(path):
         speed = d["speed"]
     info = {"rows": len(d["time"]),
             "reason": reason,
-            "throttle": d["throttle"][0],
+            "throttle": d["throttle"][d["time"] <= BRAKE_TIME],
             "speed_min": speed.min(),
             "speed_max": speed.max(),
+            "speed_spread": speed.max() - speed.min(),        # how much the speed changes inside one trip
+            "mode": d["mode"],
+            "steering": d["steering"],
             "lags": int((np.diff(d["time"]) > LAG_GAP).sum()),
             "start": d["position"][0]}
     return problems, info
@@ -162,7 +166,10 @@ def print_summary(files, infos, bad_files):
     short = sum(i["rows"] < SHORT_ROWS for i in good)
     lags = sum(i["lags"] for i in good)
     lag_files = sum(i["lags"] > 0 for i in good)
-    throttles = [i["throttle"] for i in good]
+    throttles = np.concatenate([i["throttle"] for i in good])
+    modes = np.concatenate([i["mode"] for i in good])
+    steering = np.concatenate([i["steering"] for i in good])
+    random_steer = steering[modes == "random"]
     starts = np.array([i["start"] for i in good])
     per_episode = size_mb / len(files)
 
@@ -171,9 +178,14 @@ def print_summary(files, infos, bad_files):
     print(f"Rows:        {rows}  = {rows * 0.05 / 60:.1f} min of driving")
     print(f"End:         {len(good) - crashes} timeout, {crashes} crash ({100 * crashes / len(good):.0f} %),"
           f" very short (<1 s): {short}")
-    print(f"Throttle:    {min(throttles):.3f} .. {max(throttles):.3f}")
+    print(f"Throttle:    {throttles.min():.3f} .. {throttles.max():.3f},"
+          f" coasting (0): {100 * (throttles == 0).mean():.0f} % of rows")
     print(f"Speed:       {min(i['speed_min'] for i in good):.2f} .. {max(i['speed_max'] for i in good):.2f} m/s"
-          f" (before the brake)")
+          f" (before the brake), inside one trip changes by {np.mean([i['speed_spread'] for i in good]):.2f} m/s")
+    print("Modes:       " + ", ".join(f"{m} {100 * (modes == m).mean():.0f} %" for m in MODES))
+    if len(random_steer) > 0:
+        print(f"Random steer: |s| > 0.5 in {100 * (np.abs(random_steer) > 0.5).mean():.0f} % of random rows"
+              f" (left {100 * (random_steer > 0.5).mean():.0f} %, right {100 * (random_steer < -0.5).mean():.0f} %)")
     print(f"Lags:        {lags} gaps > {LAG_GAP} s in {lag_files} files (game was slow for a moment)")
     print(f"Start x:     {starts[:, 0].min():.1f} .. {starts[:, 0].max():.1f} m,"
           f"  y: {starts[:, 1].min():.1f} .. {starts[:, 1].max():.1f} m")

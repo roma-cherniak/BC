@@ -3,7 +3,8 @@ import numpy as np
 
 
 KEYS = ["lidar", "throttle", "steering", "speed", "time", "collisions", "image",
-        "position", "orientation", "yaw_rate", "real_steering"]          # the same names as in the old npz files
+        "position", "orientation", "yaw_rate", "real_steering",          # the same names as in the old npz files
+        "mode"]                                                          # who steered: random / gap / safety
 
 rows = []
 
@@ -12,11 +13,12 @@ rows = []
 def new_episod():
     rows.clear()
 
-def add_row(obs, steering, throttle, time):
+def add_row(obs, steering, throttle, time, mode):
 
     obs["steering"] = steering
     obs["throttle"] = throttle
     obs["time"] = time
+    obs["mode"] = mode
     rows.append(obs)
 
     

@@ -7,7 +7,7 @@ import csv
 import time
 from data_collection.packet import read_packet
 import random 
-from data_collection.policy import steering_angle, reset_noise
+from data_collection.policy import decide, reset_policy
 from data_collection.recorder import rows, add_row, save, new_episod
 
 sio = socketio.Server()
@@ -19,10 +19,6 @@ waiting = 0
 global_timer = 0
 lap_timer = 0
 next_write = 0.0
-throttle = random.uniform(0.03 , 0.1)
-r_steering = 0
-random_steering = 0
-throttle_time = 0
 
 
 TRACK = "practice"
@@ -31,12 +27,7 @@ WAIT_MIN = 60
 WAIT_MAX = 1200
 EPISODE_TIME = 30   
 BRAKE_TIME = 28  
-RECORD_STEP = 0.05  
-THROTTLE_MIN = 0.03
-THROTTLE_MAX = 0.09
-STEERING_NOISE = 0.3
-THROTTLE_TIME_MIN = 1  # in seconds
-THROTTLE_TIME_MAX = 3   # in seconds
+RECORD_STEP = 0.05
 
 
 
@@ -57,13 +48,13 @@ def clock(episod_time):
 
 def start_new_episod(wait, reason):
         
-        global global_timer, next_write, waiting, episod, throttle, r_steering, warmup
+        global global_timer, next_write, waiting, episod, warmup
 
         if len(rows) > 0:
             save(f"data/random_practice/drive_{episod:04d}.npz", TRACK, reason, warmup)
 
         new_episod()
-        reset_noise()
+        reset_policy()
 
 
         global_timer = 0
@@ -71,16 +62,13 @@ def start_new_episod(wait, reason):
         waiting = wait
         warmup = wait
         episod += 1
-        throttle = random.uniform(THROTTLE_MIN, THROTTLE_MAX)
-        r_steering = 0
-        throttle_time = random.uniform(THROTTLE_TIME_MIN, THROTTLE_TIME_MAX)
         return 'True'
 
 
 @sio.on("Bridge")                                  
 def bridge(sid, data):
 
-    global packets , waiting,  next_write, throttle, lap_timer, global_timer, warmup
+    global packets , waiting,  next_write, lap_timer, global_timer, warmup
     packets = packets + 1
     reset = "False"
 
@@ -93,17 +81,17 @@ def bridge(sid, data):
 
     clock(obs["lap_time"])
 
-    if global_timer > BRAKE_TIME and waiting == 0:    
-        throttle = 0
     if global_timer  >= EPISODE_TIME and waiting == 0:
         reset = start_new_episod(random.randint(WAIT_MIN,WAIT_MAX), "timeout")
 
 
-    steering  = steering_angle(obs["lidar"], global_timer)
-    
+    throttle, steering, mode = decide(obs["lidar"], global_timer, waiting > 0)
+    if global_timer > BRAKE_TIME and waiting == 0:
+        throttle = 0
 
-    if waiting == 0 and obs["collisions"] > 0:  
-        add_row(obs, steering, throttle, global_timer)
+
+    if waiting == 0 and obs["collisions"] > 0:
+        add_row(obs, steering, throttle, global_timer, mode)
         reset = start_new_episod(random.randint(WAIT_MIN,WAIT_MAX), "crash" )
 
     elif waiting > 0 and obs["collisions"] > 0:
@@ -117,13 +105,13 @@ def bridge(sid, data):
 
     if waiting == 1:
         global_timer = 0
-        reset_noise()
+        reset_policy()
         next_write = 0
         waiting -= 1
 
 
     if global_timer > next_write and waiting  == 0:
-        add_row(obs, steering, throttle, global_timer)
+        add_row(obs, steering, throttle, global_timer, mode)
         next_write += RECORD_STEP
 
     # Send my throttle and steering to the simulator
