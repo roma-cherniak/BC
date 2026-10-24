@@ -9,7 +9,7 @@ from sigreg import sigreg
 DEVICE = "cuda" 
 BATCH = 256
 LR = 0.001
-EPOCHS = 10
+EPOCHS = 50
 SIGREG_WEIGHT = 0.09
 
 
