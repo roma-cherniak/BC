@@ -12,7 +12,7 @@ STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
 MOMENT = 1000
 LATENT = 32
 FACTS = ["front", "right", "left", "steering", "speed"]
-STEPS = 20
+STEPS = 5
 
 
 def load_pairs(name):
@@ -36,7 +36,7 @@ encoder.load_state_dict(torch.load("jepa_encoder.pt", map_location = DEVICE))
 predictor = Predictor().to(DEVICE)
 predictor.load_state_dict(torch.load("jepa_predoctor.pt", map_location = DEVICE))
 
-zond = nn.Linear(LATENT, len(FACTS)).to(DEVICE) 
+zond = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)
 zond.load_state_dict(torch.load("zond.pt", map_location = DEVICE))
 
 

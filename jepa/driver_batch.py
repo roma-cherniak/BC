@@ -43,7 +43,7 @@ encoder.load_state_dict(torch.load("jepa_encoder.pt", map_location=DEVICE))
 predictor = Predictor().to(DEVICE)
 predictor.load_state_dict(torch.load("jepa_predoctor.pt", map_location=DEVICE))
 
-zond = nn.Linear(LATENT, len(FACTS)).to(DEVICE)
+zond = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)
 zond.load_state_dict(torch.load("zond.pt", map_location=DEVICE))
 
 # safe starts: all STEPS steps stay inside one trip (the domino trick from rollout_curve.py)

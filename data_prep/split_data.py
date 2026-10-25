@@ -1,6 +1,6 @@
 import glob
 import random
-from data_colection.lidar_collection import DATA_DIR
+from data_collection.lidar_collection import DATA_DIR
 
 files = sorted(glob.glob(f"{DATA_DIR}/drive_*.npz"))
 random.seed(42)

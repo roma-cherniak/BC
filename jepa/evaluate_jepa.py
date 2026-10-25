@@ -46,7 +46,7 @@ def probe_r2(encoder):
         z = encoder(lidar_now)
         z_t = encoder(lidar_now_t)
 
-    zond = nn.Linear(LATENT, len(FACTS)).to(DEVICE)   # a NEW probe for every encoder
+    zond = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)   # a NEW MLP probe for every encoder
     optimizer = torch.optim.Adam(zond.parameters(), lr=LR)
 
     for epoch in range(PROBE_EPOCHS):

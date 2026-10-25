@@ -1,0 +1,150 @@
+﻿model saved
+epoch 0  train 0.0237816  val 0.0265312 spread 1.088417 copy_loss 0.06504885 sigloss 11.698410233758258
+time - 27
+model saved
+epoch 1  train 0.0253199  val 0.0266347 spread 1.088924 copy_loss 0.07209341 sigloss 6.384071803304571
+time - 26
+model saved
+epoch 2  train 0.0268481  val 0.0283401 spread 1.062759 copy_loss 0.07981596 sigloss 4.770596997404592
+time - 26
+model saved
+epoch 3  train 0.0291051  val 0.0298243 spread 1.045159 copy_loss 0.08276413 sigloss 3.659232324837933
+time - 27
+model saved
+epoch 4  train 0.0289595  val 0.0307744 spread 1.033688 copy_loss 0.08532639 sigloss 3.0890336952794937
+time - 25
+model saved
+epoch 5  train 0.0289149  val 0.0304232 spread 1.036041 copy_loss 0.08791763 sigloss 2.6893236552028967
+time - 25
+model saved
+epoch 6  train 0.0289607  val 0.0309729 spread 1.028817 copy_loss 0.08942968 sigloss 2.4408370556210626
+time - 25
+model saved
+epoch 7  train 0.0285124  val 0.0299182 spread 1.034618 copy_loss 0.09163873 sigloss 2.2796143096315085
+time - 25
+model saved
+epoch 8  train 0.0284986  val 0.0313409 spread 1.035244 copy_loss 0.09273381 sigloss 2.134632253523409
+time - 25
+model saved
+epoch 9  train 0.0283182  val 0.0287727 spread 1.023626 copy_loss 0.09090573 sigloss 2.0464590204185282
+time - 25
+model saved
+epoch 10  train 0.0278394  val 0.0301601 spread 1.032047 copy_loss 0.09128074 sigloss 1.9650208812934407
+time - 25
+model saved
+epoch 11  train 0.0272767  val 0.0269227 spread 1.014703 copy_loss 0.08852039 sigloss 1.925479342951577
+time - 25
+model saved
+epoch 12  train 0.0267971  val 0.0278020 spread 1.019076 copy_loss 0.08815733 sigloss 1.8895547378962563
+time - 25
+model saved
+epoch 13  train 0.0265068  val 0.0285007 spread 1.02623 copy_loss 0.08952593 sigloss 1.872596051698253
+time - 28
+model saved
+epoch 14  train 0.0261228  val 0.0271112 spread 1.023358 copy_loss 0.08855689 sigloss 1.8408371344561407
+time - 26
+model saved
+epoch 15  train 0.0258982  val 0.0283693 spread 1.015823 copy_loss 0.08746238 sigloss 1.826814319872292
+time - 25
+model saved
+epoch 16  train 0.0257202  val 0.0271139 spread 1.019251 copy_loss 0.08760717 sigloss 1.7977231018818343
+time - 25
+model saved
+epoch 17  train 0.0256646  val 0.0273456 spread 1.018827 copy_loss 0.08730313 sigloss 1.7820384619680383
+time - 25
+model saved
+epoch 18  train 0.0256020  val 0.0272994 spread 1.009738 copy_loss 0.0861614 sigloss 1.7609581813745245
+time - 25
+model saved
+epoch 19  train 0.0256120  val 0.0259043 spread 1.011417 copy_loss 0.08618371 sigloss 1.7455907846255416
+time - 25
+model saved
+epoch 20  train 0.0253989  val 0.0274410 spread 1.017134 copy_loss 0.08671738 sigloss 1.7275596449713735
+time - 25
+model saved
+epoch 21  train 0.0252994  val 0.0276754 spread 1.010527 copy_loss 0.08556384 sigloss 1.7165996149711356
+time - 25
+model saved
+epoch 22  train 0.0251326  val 0.0249510 spread 1.01306 copy_loss 0.08519299 sigloss 1.701280138284497
+time - 25
+model saved
+epoch 23  train 0.0248938  val 0.0253284 spread 1.003336 copy_loss 0.08346206 sigloss 1.6879621846436044
+time - 25
+model saved
+epoch 24  train 0.0249247  val 0.0259502 spread 1.010485 copy_loss 0.08467307 sigloss 1.681309482843213
+time - 26
+model saved
+epoch 25  train 0.0247584  val 0.0257960 spread 1.011132 copy_loss 0.08493356 sigloss 1.6707662005396284
+time - 35
+model saved
+epoch 26  train 0.0246066  val 0.0259017 spread 1.003574 copy_loss 0.08356418 sigloss 1.668328789520193
+time - 40
+model saved
+epoch 27  train 0.0245009  val 0.0257155 spread 1.008514 copy_loss 0.0837785 sigloss 1.6543386677753995
+time - 34
+model saved
+epoch 28  train 0.0244618  val 0.0253231 spread 1.012093 copy_loss 0.0846311 sigloss 1.6552665371602104
+time - 31
+model saved
+epoch 29  train 0.0243553  val 0.0253839 spread 1.016857 copy_loss 0.08546105 sigloss 1.6495327145390257
+time - 29
+model saved
+epoch 30  train 0.0242670  val 0.0246561 spread 1.009813 copy_loss 0.08450551 sigloss 1.6297248442321135
+time - 29
+model saved
+epoch 31  train 0.0240719  val 0.0244081 spread 1.005162 copy_loss 0.08357954 sigloss 1.6240951859739405
+time - 25
+model saved
+epoch 32  train 0.0240315  val 0.0250280 spread 1.012031 copy_loss 0.08468829 sigloss 1.628638175729464
+time - 25
+model saved
+epoch 33  train 0.0240362  val 0.0238185 spread 1.003975 copy_loss 0.08356238 sigloss 1.6211354890342295
+time - 25
+model saved
+epoch 34  train 0.0239117  val 0.0253000 spread 0.9980347 copy_loss 0.08221798 sigloss 1.6112229658301764
+time - 25
+model saved
+epoch 35  train 0.0237875  val 0.0242911 spread 1.013783 copy_loss 0.08473923 sigloss 1.6077292489670438
+time - 25
+model saved
+epoch 36  train 0.0236650  val 0.0251290 spread 1.010392 copy_loss 0.08429378 sigloss 1.5993966516217537
+time - 25
+model saved
+epoch 37  train 0.0237329  val 0.0247493 spread 1.01048 copy_loss 0.08444844 sigloss 1.5939576930019277
+time - 25
+model saved
+epoch 38  train 0.0235702  val 0.0252429 spread 1.005297 copy_loss 0.08422104 sigloss 1.5992155210858972
+time - 25
+model saved
+epoch 39  train 0.0235098  val 0.0246056 spread 1.004451 copy_loss 0.08401023 sigloss 1.5860809812090806
+time - 25
+model saved
+epoch 40  train 0.0234441  val 0.0244632 spread 1.006611 copy_loss 0.08469415 sigloss 1.5797996570813586
+time - 25
+model saved
+epoch 41  train 0.0233948  val 0.0242064 spread 1.005928 copy_loss 0.08339082 sigloss 1.5792416868918746
+time - 25
+model saved
+epoch 42  train 0.0232513  val 0.0240564 spread 1.012777 copy_loss 0.08515849 sigloss 1.568675265465615
+time - 25
+model saved
+epoch 43  train 0.0232276  val 0.0232693 spread 1.001771 copy_loss 0.08355175 sigloss 1.5694967846898638
+time - 25
+model saved
+epoch 44  train 0.0232092  val 0.0254753 spread 1.013079 copy_loss 0.08562966 sigloss 1.5658707985511193
+time - 25
+model saved
+epoch 45  train 0.0230322  val 0.0239141 spread 0.9975379 copy_loss 0.08274359 sigloss 1.5591779826925352
+time - 25
+model saved
+epoch 46  train 0.0230871  val 0.0245389 spread 1.006517 copy_loss 0.08413275 sigloss 1.56243813562499
+time - 25
+model saved
+epoch 47  train 0.0230023  val 0.0241478 spread 1.005113 copy_loss 0.08399959 sigloss 1.5605184313725438
+time - 25
+model saved
+epoch 48  train 0.0230002  val 0.0246889 spread 1.01327 copy_loss 0.08577182 sigloss 1.5571309942641907
+time - 25
+model saved
+epoch 49  train 0.0229127  val 0.0242326 spread 1.006606 copy_loss 0.08437596 sigloss 1.5509760979364609
+time - 25
