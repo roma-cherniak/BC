@@ -74,7 +74,6 @@ def bridge(sid, data):
 
     obs = read_packet(data)
 
-
     if packets == 1:   # Clear all data that was before
         lap_timer = obs["lap_time"]
         reset = start_new_episod(random.randint(WAIT_MIN,WAIT_MAX), "start")

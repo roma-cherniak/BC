@@ -8,7 +8,7 @@ BATCH = 256
 LR = 0.001
 PROBE_EPOCHS = 20
 TRAIN_MOMENTS = 100000
-FACTS = ["front", "right", "left", "steering", "speed"]
+FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 
 torch.manual_seed(0)                                  # the same random moments and random encoder every run
 
@@ -28,7 +28,9 @@ def make_targets(lidar_now, action, speed):
     left = torch.min(lidar_now[: , 220:230], dim = 1).values
     steering = action[:, 1]
     speed = speed[:, 0]
-    return torch.stack([front, right, left, steering, speed], dim=1)
+    front_right = torch.min(lidar_now[:, 85:95], dim = 1).values      # -45° (index = angle + 135)
+    front_left = torch.min(lidar_now[:, 175:185], dim = 1).values     # +45°
+    return torch.stack([front, right, left, steering, speed, front_right, front_left], dim=1)
 
 
 lidar_now, action, speed, lidar_next = load_pairs("train")

@@ -11,7 +11,7 @@ DEVICE = 'cuda'
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1] 
 MOMENT = 1000
 LATENT = 32
-FACTS = ["front", "right", "left", "steering", "speed"]
+FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 STEPS = 5
 
 
@@ -43,7 +43,7 @@ zond.load_state_dict(torch.load("zond.pt", map_location = DEVICE))
 with torch.no_grad():
     prediction = encoder(lidar_now[MOMENT : MOMENT + 1].float())
     zond_g = zond(prediction)
-    front_t, right_t, left_t, steering_t, speed_t_t = zond_g[0]
+    front_t, right_t, left_t, steering_t, speed_t_t = zond_g[0][:5]
     
     print(f"Start ----- front = {front_t} , right = {right_t}, left = {left_t}")
     best_steering = 0    
@@ -56,7 +56,7 @@ with torch.no_grad():
             act = torch.tensor([[action[MOMENT + i , 0].item(), steering]], device=DEVICE)   
             prediction = predictor(prediction , act , speed[MOMENT + i : MOMENT + i + 1])
             zond_guess = zond(prediction)
-            front, right, left, steering_g, speed_g = zond_guess[0]
+            front, right, left, steering_g, speed_g = zond_guess[0][:5]
 
             if i == STEPS - 1:
                 print(f"Finish for steering = {steering} -------- front =  {front} , right = {right}, left = {left}")

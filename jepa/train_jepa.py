@@ -11,11 +11,13 @@ BATCH = 256
 LR = 0.001
 EPOCHS = 50
 SIGREG_WEIGHT = 0.09
-
+K = 10
 
 log_file = open('jepa_loss.csv', 'w', newline='') 
 writer = csv.writer(log_file)                         # a helper that writes CSV rows for us
 writer.writerow(['epoch', 'train_loss', 'val_loss', 'spread', 'copy_loss', 'sigreg'])      # the header row: column names
+
+
 
 
 
@@ -32,6 +34,19 @@ def load_pairs(name):
 train = load_pairs("train")
 val = load_pairs("val")
 
+lidar_now, action, speed, lidar_next = train
+
+same_train = (lidar_next[:-1] == lidar_now[1:]).all(dim=1).cpu()
+
+
+
+print(same_train[0])
+safe_train = []
+for i in range(len(same_train) - K):
+    if same_train[i : i + K].all():
+        safe_train.append(i)
+
+safe_train = torch.tensor(safe_train, device=DEVICE)
 
 encoder = Encoder().to(DEVICE)
 predictor = Predictor().to(DEVICE)
@@ -42,7 +57,7 @@ optimizer = torch.optim.Adam(list(encoder.parameters()) +  list(predictor.parame
 
 def train_one_epoch(data):
     lidar_now, action, speed, lidar_next = data
-    order = torch.randperm(len(lidar_now), device=DEVICE)
+    order = safe_train[torch.randperm(len(safe_train), device=DEVICE)]
     total = 0
     total_reg = 0
     number_of_batches = 0
@@ -51,8 +66,12 @@ def train_one_epoch(data):
         latent_now = encoder(lidar_now[idx].float())   
         latent_next = encoder(lidar_next[idx].float())
         reg = (sigreg(latent_now) + sigreg(latent_next)) / 2
-        guess = predictor(latent_now, action[idx].float(), speed[idx].float())
-        loss = (((guess - latent_next) ** 2).mean())
+        z = latent_now
+        loss = 0
+        for k in range(K):
+            z = predictor(z, action[idx + k].float(), speed[idx + k].float())
+            loss = loss + ((z - encoder(lidar_next[idx + k].float())) ** 2).mean()
+        loss = loss / K
         sig_loss = loss + SIGREG_WEIGHT * reg 
         optimizer.zero_grad()   
         sig_loss.backward()
