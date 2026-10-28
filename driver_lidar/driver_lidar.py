@@ -55,7 +55,7 @@ def bridge(sid, data):
 
     x = torch.tensor(lidar, dtype=torch.float32, device=DEVICE)[None]
 
-
+    throttle = 0.05
 
     with torch.no_grad():
         z = encoder(x)
@@ -63,7 +63,7 @@ def bridge(sid, data):
         steering = make_decesion(z, speed , throttle)
 
     
-    throttle = 0.05
+    
 
     sio.emit('Bridge', data={'V1 Throttle': str(throttle), 'V1 Steering': str(steering), 'Reset': 'False'})
     
