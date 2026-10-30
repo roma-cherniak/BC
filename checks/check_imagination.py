@@ -52,7 +52,7 @@ def check_imagination(encoder, predictor, test):
 
            
 
-    return {"1 s": guess_loss[-1] / copy_loss[-1]}
+    return {"1 s, quess loss / copy loss": guess_loss[-1] / copy_loss[-1]}
 
 
 if __name__ == "__main__":
