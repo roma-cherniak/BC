@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from jepa.jepa_model import LATENT
-from utils import load_pairs, DEVICE, load_jepa
+from utils import load_pairs, DEVICE, load_jepa, load_zond
 
 
 
@@ -98,8 +98,7 @@ for epoch in range(PROBE_EPOCHS):
     print(f"epoch {epoch}  loss {loss.item():.5f}")
 torch.save(zond.state_dict(), "zond_imagined.pt")
 
-old = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)
-old.load_state_dict(torch.load("zond.pt", map_location=DEVICE))
+old = load_zond("zond.pt")
 
 print("\nR² on TEST imagined states (1.0 = perfect, 0 = no better than the average)")
 print(f"{'fact':<12}" + "".join(f"{f'old {k * 0.05:.2f}s':>12}{f'new {k * 0.05:.2f}s':>12}" for k in (5, 20)))

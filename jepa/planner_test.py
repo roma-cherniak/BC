@@ -11,7 +11,7 @@ import torch.nn as nn
 from jepa.jepa_model import LATENT
 from utils import load_pairs
 from utils import DEVICE
-from utils import load_jepa
+from utils import load_jepa, load_zond
 
 
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
@@ -59,8 +59,7 @@ danger = torch.from_numpy(danger[starts]).to(DEVICE)
 starts = torch.from_numpy(starts).to(DEVICE)
 
 encoder, predictor = load_jepa()
-zond = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)
-zond.load_state_dict(torch.load(ZOND_FILE, map_location=DEVICE))
+zond = load_zond(ZOND_FILE)
 
 M, K = len(starts), len(STEERING)
 with torch.no_grad():                                           # the same imagination as driver_batch.py

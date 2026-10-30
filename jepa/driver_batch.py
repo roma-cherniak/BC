@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 from jepa.jepa_model import LATENT
 from utils import load_pairs, DEVICE
-from utils import load_jepa
+from utils import load_jepa, load_zond
 
 
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
@@ -31,9 +31,7 @@ def score(facts):
 lidar_now, action, speed, lidar_next = load_pairs("test")
 
 encoder, predictor = load_jepa()
-
-zond = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)
-zond.load_state_dict(torch.load("zond.pt", map_location=DEVICE))
+zond = load_zond("zond.pt")
 
 # safe starts: all STEPS steps stay inside one trip (the domino trick from rollout_curve.py)
 same = (lidar_next[:-1] == lidar_now[1:]).all(dim=1).cpu()      # on the CPU the loop below is much faster

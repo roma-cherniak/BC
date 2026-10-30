@@ -1,11 +1,11 @@
 import numpy as np
 import torch
 from jepa.jepa_model import Encoder, Predictor, LATENT
-
+import torch.nn as nn
 
 
 DEVICE = 'cuda'
-
+FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 
 
 
@@ -29,3 +29,12 @@ def load_jepa():
     predictor.load_state_dict(torch.load("jepa_predoctor.pt", map_location=DEVICE))
 
     return encoder, predictor
+
+
+
+
+def load_zond(file):
+    zond = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)
+    zond.load_state_dict(torch.load(file, map_location=DEVICE))
+
+    return zond
