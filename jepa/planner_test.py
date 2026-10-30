@@ -25,12 +25,11 @@ BINS = [0, 0.5, 1.0, 1.5, 2.01]     # |real steering - brain choice|
 
 
 def score(facts):
-    """the closest of the five walls: bigger = better (the old sum front + right + left only looked ahead)"""
+   
     return facts[:, WALLS].min(dim=1).values
 
 
 def trip_info(name):
-    """for every pair: mode, time, danger soon (safety or crash within DANGER_WINDOW), enough future to judge"""
     modes, times, danger, judge = [], [], [], []
     for file in open(f"data/{name}.txt").read().split("\n"):
         with np.load(file) as f:

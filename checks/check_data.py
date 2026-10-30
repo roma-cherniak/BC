@@ -211,4 +211,5 @@ def main():
     print_summary(files, infos, bad_files)
 
 
-main()
+
+if __name__ == "__main__": main()
