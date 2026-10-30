@@ -2,8 +2,8 @@ import torch
 from jepa.jepa_model import Encoder, Predictor
 import time
 import csv
-from jepa.sigreg import sigreg
-from utils import load_pairs
+from core.sigreg import sigreg
+from core.data import load_pairs, safe_starts
 from config import DEVICE
 
 BATCH = 256
@@ -24,18 +24,7 @@ train = load_pairs("train")
 val = load_pairs("val")
 
 lidar_now, action, speed, lidar_next = train
-
-same_train = (lidar_next[:-1] == lidar_now[1:]).all(dim=1).cpu()
-
-
-
-print(same_train[0])
-safe_train = []
-for i in range(len(same_train) - K):
-    if same_train[i : i + K].all():
-        safe_train.append(i)
-
-safe_train = torch.tensor(safe_train, device=DEVICE)
+safe_train = safe_starts(lidar_now, lidar_next, K)          # starts whose K steps stay inside one trip
 
 encoder = Encoder().to(DEVICE)
 predictor = Predictor().to(DEVICE)

@@ -6,8 +6,9 @@
 
 import numpy as np
 import torch
-from jepa.jepa_model import LATENT
-from utils import load_pairs, load_jepa, load_zond
+from core.data import load_pairs
+from core.imagine import imagine_step
+from utils import load_jepa, load_zond
 from config import WALLS
 
 
@@ -52,8 +53,7 @@ def brain_choice(encoder, predictor, zond, lidar_now, action, speed, starts):
         spd = speed[starts].repeat_interleave(K, dim=0)
         worst = torch.full((M * K,), float("inf"), device=device)    # the closest wall on the WHOLE imagined path
         for i in range(STEPS):
-            z = predictor(z, act, spd)
-            z = z / z.norm(dim=1, keepdim=True) * LATENT ** 0.5        # guard B: no drifting away
+            z = imagine_step(predictor, z, act, spd, guard=True)
             worst = torch.minimum(worst, score(zond(z).clamp(0, 1)))
     return options[worst.view(M, K).argmax(dim=1)]
 

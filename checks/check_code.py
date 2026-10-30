@@ -4,7 +4,7 @@
 import numpy as np
 import torch
 from jepa.jepa_model import LATENT, LIDAR
-from jepa.sigreg import sigreg
+from core.sigreg import sigreg
 from utils import load_pairs, load_jepa, load_zond
 from config import FACTS, LIDAR_BEAMS, MAX_RANGE
 from core.sensors import clean_lidar

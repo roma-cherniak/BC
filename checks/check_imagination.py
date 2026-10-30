@@ -1,7 +1,8 @@
 import torch
-from jepa.jepa_model import LATENT
 import random
-from utils import load_pairs, load_jepa
+from core.data import load_pairs, safe_starts
+from core.imagine import imagine_step
+from utils import load_jepa
 
 
 
@@ -17,17 +18,11 @@ def check_imagination(encoder, predictor, test):
     with torch.no_grad():
         lidar_now, action, speed, lidar_next = test
 
-        same = (lidar_next[:-1] == lidar_now[1:]).all(dim=1)  
-        safe = []
-        for i in range(len(same) - STEPS):
-            if same[i : i + STEPS].all():
-                safe.append(i)
-
-
+        safe = safe_starts(lidar_now, lidar_next, STEPS)
 
         random.seed(0)
-        starts = random.sample(safe, 500)              
-        starts = torch.tensor(starts) 
+        starts = random.sample(safe.tolist(), 500)      # random.sample needs a plain list, not a tensor
+        starts = torch.tensor(starts)
 
 
         latent_prediction = encoder(lidar_now[starts].float())
@@ -35,8 +30,8 @@ def check_imagination(encoder, predictor, test):
 
         for i in range(STEPS):
 
-            latent_prediction = predictor(latent_prediction, action[starts + i], speed[starts + i])
-            latent_prediction = latent_prediction / latent_prediction.norm(dim=1, keepdim=True) * LATENT ** 0.5
+            latent_prediction = imagine_step(predictor, latent_prediction, action[starts + i], speed[starts + i],
+                                             guard=True)
             real_latent = encoder(lidar_now[starts + i + 1].float())
 
             loss = ((real_latent - latent_prediction) ** 2).mean().item()
