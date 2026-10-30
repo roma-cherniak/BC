@@ -1,12 +1,13 @@
 import torch
-from jepa_model import Encoder, Predictor, LATENT
+from jepa.jepa_model import Encoder, Predictor, LATENT
 import numpy as np
 import torch.nn as nn
 import random
 import matplotlib.pyplot as plt
+from utils import load_pairs, DEVICE
 
 
-DEVICE = 'cuda'
+
 BATCH = 256
 LR = 0.001
 PROBE_EPOCHS = 20
@@ -17,15 +18,6 @@ STEPS = 20 # 1 second
 
 torch.manual_seed(0)                                  # the same random moments and random encoder every run
 
-
-
-def load_pairs(name):
-    d = np.load(f"data/{name}_pairs.npz")
-    lidar_now = torch.from_numpy(d["lidar_now"]).to(DEVICE)
-    action = torch.from_numpy(d["act"]).float().to(DEVICE)
-    speed = torch.from_numpy(d["spd"]).float().to(DEVICE)[:, None]
-    lidar_next = torch.from_numpy(d["lidar_next"]).to(DEVICE)
-    return lidar_now, action, speed, lidar_next
 
 
 

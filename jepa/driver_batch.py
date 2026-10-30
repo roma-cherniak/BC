@@ -7,24 +7,17 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
-from jepa_model import Encoder, Predictor, LATENT
+from jepa.jepa_model import Encoder, Predictor, LATENT
+from utils import load_pairs, DEVICE
 
 
-DEVICE = 'cuda'
+
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
 STEPS = 5              # 10 x 0.05 s = 0.5 s of imagination
 MOMENTS = 500           # how many random test moments
 FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 CLEAR_TURN = 0.1        # |real steering| above this = the driver clearly turned
 
-
-def load_pairs(name):
-    d = np.load(f"data/{name}_pairs.npz")
-    lidar_now = torch.from_numpy(d["lidar_now"]).to(DEVICE)
-    action = torch.from_numpy(d["act"]).float().to(DEVICE)
-    speed = torch.from_numpy(d["spd"]).float().to(DEVICE)[:, None]
-    lidar_next = torch.from_numpy(d["lidar_next"]).to(DEVICE)
-    return lidar_now, action, speed, lidar_next
 
 
 def score(facts):

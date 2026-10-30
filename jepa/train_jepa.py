@@ -1,12 +1,11 @@
 import numpy as np
 import torch
-from jepa_model import Encoder, Predictor
+from jepa.jepa_model import Encoder, Predictor
 import time
 import csv
-from sigreg import sigreg
+from jepa.sigreg import sigreg
+from utils import load_pairs, DEVICE
 
-
-DEVICE = "cuda" 
 BATCH = 256
 LR = 0.001
 EPOCHS = 50
@@ -18,16 +17,6 @@ writer = csv.writer(log_file)                         # a helper that writes CSV
 writer.writerow(['epoch', 'train_loss', 'val_loss', 'spread', 'copy_loss', 'sigreg'])      # the header row: column names
 
 
-
-
-
-def load_pairs(name):
-    d = np.load(f"data/{name}_pairs.npz")
-    lidar_now = torch.from_numpy(d["lidar_now"]).to(DEVICE)
-    action = torch.from_numpy(d["act"]).float().to(DEVICE)
-    speed = torch.from_numpy(d["spd"]).float().to(DEVICE)[:, None]
-    lidar_next = torch.from_numpy(d["lidar_next"]).to(DEVICE)
-    return lidar_now, action, speed, lidar_next
 
 
 

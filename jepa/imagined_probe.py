@@ -8,10 +8,12 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
-from jepa_model import Encoder, Predictor, LATENT
+from jepa.jepa_model import Encoder, Predictor, LATENT
+from utils import load_pairs, DEVICE
 
 
-DEVICE = 'cuda'
+
+
 BATCH = 256
 LR = 0.001
 PROBE_EPOCHS = 3
@@ -22,15 +24,6 @@ FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_le
 
 torch.manual_seed(0)
 random.seed(0)
-
-
-def load_pairs(name):
-    d = np.load(f"data/{name}_pairs.npz")
-    lidar_now = torch.from_numpy(d["lidar_now"]).to(DEVICE)
-    action = torch.from_numpy(d["act"]).float().to(DEVICE)
-    speed = torch.from_numpy(d["spd"]).float().to(DEVICE)[:, None]
-    lidar_next = torch.from_numpy(d["lidar_next"]).to(DEVICE)
-    return lidar_now, action, speed, lidar_next
 
 
 def make_targets(lidar_now, action, speed):

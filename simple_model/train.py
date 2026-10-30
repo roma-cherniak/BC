@@ -1,9 +1,12 @@
 import numpy as np
 import torch
-from model import NeuralModel
+from simple_model.model import NeuralModel
 import time
 import csv
-DEVICE = "cuda" 
+from utils import load_pairs, DEVICE
+
+
+
 BATCH = 256
 LR = 0.001
 EPOCHS = 40
@@ -12,16 +15,6 @@ EPOCHS = 40
 log_file = open('loss.csv', 'w', newline='') 
 writer = csv.writer(log_file)                         # a helper that writes CSV rows for us
 writer.writerow(['epoch', 'train_loss', 'val_loss'])      # the header row: column names
-
-
-
-def load_pairs(name):
-    d = np.load(f"data/{name}_pairs.npz")
-    lidar_now = torch.from_numpy(d["lidar_now"]).to(DEVICE)
-    action = torch.from_numpy(d["act"]).float().to(DEVICE)
-    speed = torch.from_numpy(d["spd"]).float().to(DEVICE)[:, None]
-    lidar_next = torch.from_numpy(d["lidar_next"]).to(DEVICE)
-    return lidar_now, action, speed, lidar_next
 
 
 train = load_pairs("train")

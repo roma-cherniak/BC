@@ -19,6 +19,7 @@ def read_laser(data):
     return [float(v) for v in text.split()]
 
 
+
 def read_packet(data):
 
     obs = {}

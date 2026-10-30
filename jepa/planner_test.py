@@ -8,10 +8,11 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from jepa_model import Encoder, Predictor, LATENT
+from jepa.jepa_model import Encoder, Predictor, LATENT
+from utils import load_pairs
+from utils import DEVICE
 
 
-DEVICE = 'cuda'
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
 STEPS = 20              # 20 x 0.05 s = 1 s of imagination
 DANGER_WINDOW = 10      # 10 x 0.05 s = 0.5 s: if safety had to save the car or it crashed -> danger
@@ -22,12 +23,6 @@ ZOND_FILE = "zond.pt"                   # probe on real states (evaluate_jepa.py
 BINS = [0, 0.5, 1.0, 1.5, 2.01]     # |real steering - brain choice|
 
 
-def load_pairs(name):
-    d = np.load(f"data/{name}_pairs.npz")
-    lidar_now = torch.from_numpy(d["lidar_now"]).to(DEVICE)
-    action = torch.from_numpy(d["act"]).float().to(DEVICE)
-    speed = torch.from_numpy(d["spd"]).float().to(DEVICE)[:, None]
-    return lidar_now, action, speed
 
 
 def score(facts):
@@ -54,7 +49,7 @@ def trip_info(name):
     return [np.concatenate(x) for x in (modes, times, danger, judge)]
 
 
-lidar_now, action, speed = load_pairs("test")
+lidar_now, action, speed, no = load_pairs("test")
 modes, times, danger, judge = trip_info("test")
 assert len(modes) == len(action)
 

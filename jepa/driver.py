@@ -1,27 +1,17 @@
 import numpy as np
 import torch
-from jepa_model import Encoder, Predictor
+from jepa.jepa_model import Encoder, Predictor
 import time
 import csv
-from sigreg import sigreg
+from jepa.sigreg import sigreg
 import torch.nn as nn
+from utils import load_pairs, DEVICE
 
-
-DEVICE = 'cuda'
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1] 
 MOMENT = 1000
 LATENT = 32
 FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 STEPS = 5
-
-
-def load_pairs(name):
-    d = np.load(f"data/{name}_pairs.npz")
-    lidar_now = torch.from_numpy(d["lidar_now"]).to(DEVICE)
-    action = torch.from_numpy(d["act"]).float().to(DEVICE)
-    speed = torch.from_numpy(d["spd"]).float().to(DEVICE)[:, None]
-    lidar_next = torch.from_numpy(d["lidar_next"]).to(DEVICE)
-    return lidar_now, action, speed, lidar_next
 
 
 
