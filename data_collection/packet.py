@@ -1,22 +1,11 @@
 import base64
-import gzip
+from core.sensors import read_laser
 
 
 
 
 KEYS = ["Ranges", "Speed", "Time", "Steering", "Throttle", "Colisions", "Position", "Orientation", "Yaw_rate", "Real_steering"]
 rows = {key : [] for key in KEYS}
-
-
-
-def read_laser(data):
-    packed = data['V1 LIDAR Range Array']                              # the zipped text
-    try:
-        text = gzip.decompress(base64.b64decode(packed)).decode('utf-8')   # unzip → normal text
-    except Exception:
-        print("LIDAR is not zipped? first symbols:", packed[:80])          # TEMP: to find the padding bug
-        raise
-    return [float(v) for v in text.split()]
 
 
 

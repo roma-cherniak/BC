@@ -1,12 +1,8 @@
 import numpy as np
-from config import MAX_RANGE, BEAM_STEP, THROTTLE_MAX, SPEED_MAX
+from config import THROTTLE_MAX, SPEED_MAX
+from core.sensors import clean_lidar
 
 
-
-def clean_lidar(lidar):
-    lidar = lidar[:, :: BEAM_STEP]              
-    lidar = np.minimum(lidar, MAX_RANGE)       
-    return lidar / MAX_RANGE                  
 
 def clean_action(f):
     throttle = f["throttle"] / THROTTLE_MAX

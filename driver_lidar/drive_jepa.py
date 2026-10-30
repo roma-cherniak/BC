@@ -9,20 +9,18 @@
 # Run from the BC folder, then click "Disconnected" in the game menu:
 #     venv\Scripts\python -m driver_lidar.drive_jepa
 
-import base64
 import csv
-import gzip
 import time
 
 import eventlet
 import eventlet.wsgi
-import numpy as np
 import socketio
 import torch
 import torch.nn as nn
 
 from jepa.jepa_model import Encoder, Predictor, LATENT
-from config import FACTS, BEAM_STEP, MAX_RANGE, THROTTLE_MAX, SPEED_MAX
+from config import FACTS, THROTTLE_MAX, SPEED_MAX
+from core.sensors import read_laser, clean_lidar
 
 
 DEVICE = "cpu"              # the game needs the graphics card; 9 options x 10 steps take a few ms on the CPU
@@ -32,20 +30,6 @@ THROTTLE = 0.08             # constant; the training data had 0.03 .. 0.09
 SMOOTH = 0.01               # penalty per unit of steering change (0.01 = 10 cm of wall distance) -> less zig-zag
 RESET_PAUSE = 30            # messages to ignore the collision counter after a reset (the game needs a moment)
 PRINT_EVERY = 60            # ~1 s
-
-
-def read_laser(data):
-    packed = data["V1 LIDAR Range Array"]
-    try:
-        text = gzip.decompress(base64.b64decode(packed)).decode("utf-8")   # practice / compete builds
-    except Exception:
-        text = packed                                                      # some builds send plain text
-    return np.array([float(v) for v in text.split()])
-
-
-def clean_lidar(ranges):
-    
-    return np.minimum(ranges[::BEAM_STEP], MAX_RANGE) / MAX_RANGE
 
 
 def score(facts):
