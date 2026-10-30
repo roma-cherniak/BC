@@ -1,5 +1,6 @@
 import torch
-from utils import load_pairs, DEVICE, load_jepa, load_zond
+from utils import load_pairs, load_jepa, load_zond
+from config import DEVICE
 
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
 MOMENT = 1000

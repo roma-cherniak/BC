@@ -2,9 +2,7 @@
 
 
 import numpy as np
-
-# DATA_DIR - directory in what save datset
-DATA_DIR = "data/random_practice"
+from config import DATA_DIR             # directory in what save datset
 def save_npz(ranges,speed_list,time_list, noise_steering , my_throttle, episod, collisions, image_list, position_list, orientation_list, yaw_rate_list,real_steering_list,track, reason, warmup):
     np.savez_compressed(f"{DATA_DIR}/drive_{episod:04d}.npz", 
                         lidar = np.array(ranges, dtype = np.float16), 

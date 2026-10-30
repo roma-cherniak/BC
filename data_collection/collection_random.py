@@ -5,6 +5,7 @@ from data_collection.packet import read_packet
 import random 
 from data_collection.policy import decide, reset_policy
 from data_collection.recorder import rows, add_row, save, new_episod
+from config import DATA_DIR, WAIT_MIN, WAIT_MAX, EPISODE_TIME, BRAKE_TIME, RECORD_STEP
 
 sio = socketio.Server()
 
@@ -18,12 +19,7 @@ next_write = 0.0
 
 
 TRACK = "practice"
-warmup = 0   
-WAIT_MIN = 60
-WAIT_MAX = 1200
-EPISODE_TIME = 30   
-BRAKE_TIME = 28  
-RECORD_STEP = 0.05
+warmup = 0
 
 
 
@@ -47,7 +43,7 @@ def start_new_episod(wait, reason):
         global global_timer, next_write, waiting, episod, warmup
 
         if len(rows) > 0:
-            save(f"data/random_practice/drive_{episod:04d}.npz", TRACK, reason, warmup)
+            save(f"{DATA_DIR}/drive_{episod:04d}.npz", TRACK, reason, warmup)
 
         new_episod()
         reset_policy()

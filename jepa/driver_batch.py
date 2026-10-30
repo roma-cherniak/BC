@@ -5,8 +5,9 @@
 
 import random
 import torch
-from utils import load_pairs, DEVICE
+from utils import load_pairs
 from utils import load_jepa, load_zond
+from config import DEVICE
 
 
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]

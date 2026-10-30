@@ -8,13 +8,13 @@ import numpy as np
 import torch
 from jepa.jepa_model import LATENT
 from utils import load_pairs, load_jepa, load_zond
+from config import WALLS
 
 
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
 STEPS = 20              # 20 x 0.05 s = 1 s of imagination
 DANGER_WINDOW = 10      # 10 x 0.05 s = 0.5 s: if safety had to save the car or it crashed -> danger
 BRAKE_TIME = 27.5       # s, after this the trip brakes to the end, skip those moments
-WALLS = [0, 1, 2, 5, 6] # which facts are wall distances
 AGREE = 0.5             # |coin - brain| below this = the coin steered like the brain
 
 

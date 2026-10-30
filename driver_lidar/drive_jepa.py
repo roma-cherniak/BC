@@ -22,7 +22,7 @@ import torch
 import torch.nn as nn
 
 from jepa.jepa_model import Encoder, Predictor, LATENT
-from utils import FACTS
+from config import FACTS, BEAM_STEP, MAX_RANGE, THROTTLE_MAX, SPEED_MAX
 
 
 DEVICE = "cpu"              # the game needs the graphics card; 9 options x 10 steps take a few ms on the CPU
@@ -45,7 +45,7 @@ def read_laser(data):
 
 def clean_lidar(ranges):
     
-    return np.minimum(ranges[::4], 10) / 10
+    return np.minimum(ranges[::BEAM_STEP], MAX_RANGE) / MAX_RANGE
 
 
 def score(facts):
@@ -70,8 +70,8 @@ def plan(lidar, speed, previous):
     """lidar: 271 cleaned beams, speed in m/s, previous: the last steering -> the best steering (a plain number)"""
     with torch.no_grad():
         z = encoder(torch.tensor(lidar, dtype=torch.float32, device=DEVICE)[None]).repeat(K, 1)   # (9, 32)
-        act = torch.stack([torch.full((K,), THROTTLE / 0.09, device=DEVICE), OPTIONS], dim=1)       # (9, 2)
-        spd = torch.full((K, 1), speed / 3, device=DEVICE)                                           # (9, 1)
+        act = torch.stack([torch.full((K,), THROTTLE / THROTTLE_MAX, device=DEVICE), OPTIONS], dim=1)       # (9, 2)
+        spd = torch.full((K, 1), speed / SPEED_MAX, device=DEVICE)                                           # (9, 1)
         worst = torch.full((K,), float("inf"), device=DEVICE)   # the closest wall on the whole imagined path
         for _ in range(STEPS):
             z = predictor(z, act, spd)

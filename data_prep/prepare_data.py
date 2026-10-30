@@ -1,9 +1,5 @@
 import numpy as np
-
-MAX_RANGE = 10        
-BEAM_STEP = 4         
-THROTTLE = 0.09
-SPEED_MAX = 3
+from config import MAX_RANGE, BEAM_STEP, THROTTLE_MAX, SPEED_MAX
 
 
 
@@ -13,7 +9,7 @@ def clean_lidar(lidar):
     return lidar / MAX_RANGE                  
 
 def clean_action(f):
-    throttle = f["throttle"] / THROTTLE
+    throttle = f["throttle"] / THROTTLE_MAX
     steering = f["steering"]
 
     return np.stack([throttle, steering], axis=1)

@@ -1,7 +1,8 @@
 import torch
 from jepa.jepa_model import Encoder, LATENT
 import torch.nn as nn
-from utils import load_pairs, DEVICE, FACTS
+from utils import load_pairs
+from config import DEVICE, FACTS, FRONT, RIGHT, LEFT, FRONT_RIGHT, FRONT_LEFT
 
 
 
@@ -15,13 +16,13 @@ torch.manual_seed(0)                                  # the same random moments 
 
 
 def make_targets(lidar_now, action, speed):
-    front = torch.min(lidar_now[:, 130:140], dim = 1).values
-    right = torch.min(lidar_now[: , 40:50], dim = 1).values
-    left = torch.min(lidar_now[: , 220:230], dim = 1).values
+    front = torch.min(lidar_now[:, FRONT], dim = 1).values
+    right = torch.min(lidar_now[: , RIGHT], dim = 1).values
+    left = torch.min(lidar_now[: , LEFT], dim = 1).values
     steering = action[:, 1]
     speed = speed[:, 0]
-    front_right = torch.min(lidar_now[:, 85:95], dim = 1).values      # -45° (index = angle + 135)
-    front_left = torch.min(lidar_now[:, 175:185], dim = 1).values     # +45°
+    front_right = torch.min(lidar_now[:, FRONT_RIGHT], dim = 1).values
+    front_left = torch.min(lidar_now[:, FRONT_LEFT], dim = 1).values
     return torch.stack([front, right, left, steering, speed, front_right, front_left], dim=1)
 
 

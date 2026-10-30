@@ -9,7 +9,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 from jepa.jepa_model import LATENT
-from utils import load_pairs, DEVICE, load_jepa, load_zond, FACTS
+from utils import load_pairs, load_jepa, load_zond
+from config import DEVICE, FACTS, FRONT, RIGHT, LEFT, FRONT_RIGHT, FRONT_LEFT
 
 
 
@@ -27,11 +28,11 @@ random.seed(0)
 
 def make_targets(lidar_now, action, speed):
     """the same facts as evaluate_jepa.py"""
-    front = torch.min(lidar_now[:, 130:140], dim = 1).values
-    right = torch.min(lidar_now[:, 40:50], dim = 1).values
-    left = torch.min(lidar_now[:, 220:230], dim = 1).values
-    front_right = torch.min(lidar_now[:, 85:95], dim = 1).values
-    front_left = torch.min(lidar_now[:, 175:185], dim = 1).values
+    front = torch.min(lidar_now[:, FRONT], dim = 1).values
+    right = torch.min(lidar_now[:, RIGHT], dim = 1).values
+    left = torch.min(lidar_now[:, LEFT], dim = 1).values
+    front_right = torch.min(lidar_now[:, FRONT_RIGHT], dim = 1).values
+    front_left = torch.min(lidar_now[:, FRONT_LEFT], dim = 1).values
     return torch.stack([front, right, left, action[:, 1], speed[:, 0], front_right, front_left], dim=1)
 
 

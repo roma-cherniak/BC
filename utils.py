@@ -2,10 +2,7 @@ import numpy as np
 import torch
 from jepa.jepa_model import Encoder, Predictor, LATENT
 import torch.nn as nn
-
-
-DEVICE = 'cuda'
-FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
+from config import DEVICE, FACTS
 
 
 

@@ -1,17 +1,12 @@
 # Check every episode file before the big (night) collection.
-# Run:  venv\Scripts\python test_data.py
+# Run from the BC folder:  venv\Scripts\python -m checks.check_data
 
 import glob
 import os
 import numpy as np
-from data_collection.lidar_collection import DATA_DIR
-from data_collection.policy import THROTTLE_MIN, THROTTLE_MAX
+from config import (DATA_DIR, THROTTLE_MIN, THROTTLE_MAX, EPISODE_TIME, BRAKE_TIME,
+                    WAIT_MIN, WAIT_MAX, RECORD_STEP)     # the same numbers collection_random.py uses
 
-# must match collection_random.py (copied, because importing it would start the server)
-EPISODE_TIME = 30
-BRAKE_TIME = 28
-WAIT_MIN = 60
-WAIT_MAX = 1200
 MODES = ("random", "gap", "safety")   # who steered (policy.py)
 
 BEAMS = 1081            # lidar beams in one scan
@@ -175,7 +170,7 @@ def print_summary(files, infos, bad_files):
 
     print()
     print(f"Files:       {len(files)}   missing numbers: {missing if missing else 'none'}")
-    print(f"Rows:        {rows}  = {rows * 0.05 / 60:.1f} min of driving")
+    print(f"Rows:        {rows}  = {rows * RECORD_STEP / 60:.1f} min of driving")
     print(f"End:         {len(good) - crashes} timeout, {crashes} crash ({100 * crashes / len(good):.0f} %),"
           f" very short (<1 s): {short}")
     print(f"Throttle:    {throttles.min():.3f} .. {throttles.max():.3f},"

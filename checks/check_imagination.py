@@ -10,11 +10,6 @@ STEPS = 20 # 1 second
 torch.manual_seed(0)   
 
 
-
-
-
-
-
 def check_imagination(encoder, predictor, test):
 
     guess_loss, copy_loss = [], []

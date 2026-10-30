@@ -4,7 +4,8 @@
 import torch
 from jepa.jepa_model import LATENT
 from jepa.sigreg import sigreg
-from utils import load_pairs, load_jepa, load_zond, FACTS
+from utils import load_pairs, load_jepa, load_zond
+from config import FACTS
 
 
 ROWS = 8                # how many test moments go through the models

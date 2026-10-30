@@ -3,7 +3,8 @@ from jepa.jepa_model import Encoder, Predictor
 import time
 import csv
 from jepa.sigreg import sigreg
-from utils import load_pairs, DEVICE
+from utils import load_pairs
+from config import DEVICE
 
 BATCH = 256
 LR = 0.001

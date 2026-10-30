@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import random
+from config import THROTTLE_MIN, THROTTLE_MAX
 
 # working range from 180 to 900
 # 900 - left , 180 - rinht
@@ -10,8 +11,6 @@ r_steering = 0
 random_steering = 0
 
 # --- variety for the camera dataset ---
-THROTTLE_MIN = 0.03
-THROTTLE_MAX = 0.09
 THROTTLE_HOLD = (1, 3)          # s, one throttle value is kept this long
 COAST_SHARE = 0              # sometimes throttle 0 -> the car slows down
 MODE_HOLD = (2, 5)              # s, one driving mode is kept this long
