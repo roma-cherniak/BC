@@ -15,7 +15,6 @@ from utils import load_jepa, load_zond
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
 STEPS = 5              # 10 x 0.05 s = 0.5 s of imagination
 MOMENTS = 500           # how many random test moments
-FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 CLEAR_TURN = 0.1        # |real steering| above this = the driver clearly turned
 
 

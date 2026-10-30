@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from jepa.jepa_model import LATENT
-from utils import load_pairs, DEVICE, load_jepa, load_zond
+from utils import load_pairs, DEVICE, load_jepa, load_zond, FACTS
 
 
 
@@ -20,7 +20,6 @@ PROBE_EPOCHS = 3
 STEPS = 20              # the same 1 s as planner_test.py
 TRAIN_STARTS = 50000    # random train starts -> TRAIN_STARTS * STEPS imagined states
 TEST_STARTS = 5000
-FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 
 torch.manual_seed(0)
 random.seed(0)

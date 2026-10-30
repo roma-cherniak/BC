@@ -18,7 +18,6 @@ STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
 STEPS = 20              # 20 x 0.05 s = 1 s of imagination
 DANGER_WINDOW = 10      # 10 x 0.05 s = 0.5 s: if safety had to save the car or it crashed -> danger
 BRAKE_TIME = 27.5       # s, after this the trip brakes to the end, skip those moments
-FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 WALLS = [0, 1, 2, 5, 6]                 # which facts are wall distances
 ZOND_FILE = "zond.pt"                   # probe on real states (evaluate_jepa.py); "zond_imagined.pt" was worse
 BINS = [0, 0.5, 1.0, 1.5, 2.01]     # |real steering - brain choice|

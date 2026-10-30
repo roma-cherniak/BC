@@ -12,7 +12,6 @@ BATCH = 256
 LR = 0.001
 PROBE_EPOCHS = 20
 TRAIN_MOMENTS = 100000
-FACTS = ["front", "right", "left", "steering", "speed"]
 STEPS = 20 # 1 second
 
 
@@ -44,12 +43,6 @@ starts = torch.tensor(starts)
 
 
 encoder, predictor = load_jepa()
-
-
-
-
-        
-
 
 def rollout_error():
 

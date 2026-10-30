@@ -9,7 +9,6 @@ from utils import load_pairs, DEVICE, load_jepa, load_zond
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1] 
 MOMENT = 1000
 LATENT = 32
-FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 STEPS = 5
 
 

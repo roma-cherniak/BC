@@ -2,7 +2,7 @@ import torch
 from jepa.jepa_model import Encoder, LATENT
 import numpy as np
 import torch.nn as nn
-from utils import load_pairs, DEVICE
+from utils import load_pairs, DEVICE, FACTS
 
 
 
@@ -10,7 +10,6 @@ BATCH = 256
 LR = 0.001
 PROBE_EPOCHS = 20
 TRAIN_MOMENTS = 100000
-FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 
 torch.manual_seed(0)                                  # the same random moments and random encoder every run
 
