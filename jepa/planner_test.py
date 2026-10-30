@@ -8,9 +8,10 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from jepa.jepa_model import Encoder, Predictor, LATENT
+from jepa.jepa_model import LATENT
 from utils import load_pairs
 from utils import DEVICE
+from utils import load_jepa
 
 
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
@@ -57,10 +58,7 @@ starts = np.flatnonzero((modes == "random") & (times < BRAKE_TIME) & judge)
 danger = torch.from_numpy(danger[starts]).to(DEVICE)
 starts = torch.from_numpy(starts).to(DEVICE)
 
-encoder = Encoder().to(DEVICE)
-encoder.load_state_dict(torch.load("jepa_encoder.pt", map_location=DEVICE))
-predictor = Predictor().to(DEVICE)
-predictor.load_state_dict(torch.load("jepa_predoctor.pt", map_location=DEVICE))
+encoder, predictor = load_jepa()
 zond = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)
 zond.load_state_dict(torch.load(ZOND_FILE, map_location=DEVICE))
 

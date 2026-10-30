@@ -1,10 +1,10 @@
 import torch
-from jepa.jepa_model import Encoder, Predictor, LATENT
+from jepa.jepa_model import LATENT
 import numpy as np
 import torch.nn as nn
 import random
 import matplotlib.pyplot as plt
-from utils import load_pairs, DEVICE
+from utils import load_pairs, DEVICE, load_jepa
 
 
 
@@ -43,11 +43,7 @@ starts = torch.tensor(starts)
 
 
 
-encoder = Encoder().to(DEVICE)
-encoder.load_state_dict(torch.load("jepa_encoder.pt", map_location = DEVICE))
-
-predictor = Predictor().to(DEVICE)
-predictor.load_state_dict(torch.load("jepa_predoctor.pt", map_location = DEVICE))
+encoder, predictor = load_jepa()
 
 
 

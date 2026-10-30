@@ -8,8 +8,8 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
-from jepa.jepa_model import Encoder, Predictor, LATENT
-from utils import load_pairs, DEVICE
+from jepa.jepa_model import LATENT
+from utils import load_pairs, DEVICE, load_jepa
 
 
 
@@ -75,10 +75,7 @@ def r2(zond, z, facts, lazy):
         return 1 - ((zond(z) - facts) ** 2).mean(dim=0) / ((lazy - facts) ** 2).mean(dim=0)
 
 
-encoder = Encoder().to(DEVICE)
-encoder.load_state_dict(torch.load("jepa_encoder.pt", map_location=DEVICE))
-predictor = Predictor().to(DEVICE)
-predictor.load_state_dict(torch.load("jepa_predoctor.pt", map_location=DEVICE))
+encoder, predictor = load_jepa()
 
 train = load_pairs("train")
 z_train, facts_train = imagine(train, safe_starts(train, "train", TRAIN_STARTS))

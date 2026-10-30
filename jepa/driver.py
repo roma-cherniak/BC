@@ -1,11 +1,10 @@
 import numpy as np
 import torch
-from jepa.jepa_model import Encoder, Predictor
 import time
 import csv
 from jepa.sigreg import sigreg
 import torch.nn as nn
-from utils import load_pairs, DEVICE
+from utils import load_pairs, DEVICE, load_jepa
 
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1] 
 MOMENT = 1000
@@ -20,11 +19,7 @@ test = load_pairs("test")
 lidar_now, action, speed, lidar_next = test
 
 
-encoder = Encoder().to(DEVICE)
-encoder.load_state_dict(torch.load("jepa_encoder.pt", map_location = DEVICE))
-
-predictor = Predictor().to(DEVICE)
-predictor.load_state_dict(torch.load("jepa_predoctor.pt", map_location = DEVICE))
+encoder, predictor = load_jepa()
 
 zond = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)
 zond.load_state_dict(torch.load("zond.pt", map_location = DEVICE))
