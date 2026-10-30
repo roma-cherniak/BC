@@ -17,9 +17,6 @@ speed = torch.from_numpy(d["spd"]).float()[:, None]
 lidar_next = torch.from_numpy(d["lidar_next"]).float()
 
 
-
-
-
 same = (lidar_next[:-1] == lidar_now[1:]).all(dim=1)  
 
 

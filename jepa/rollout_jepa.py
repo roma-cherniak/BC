@@ -21,7 +21,6 @@ same = (lidar_next[:-1] == lidar_now[1:]).all(dim=1)
 
 
 
-print(same[0])
 safe = []
 for i in range(len(same) - STEPS):
     if same[i : i + STEPS].all():
@@ -32,8 +31,6 @@ for i in range(len(same) - STEPS):
 random.seed(0)
 starts = random.sample(safe, 500)              
 starts = torch.tensor(starts)                   
-
-
 
 
 encoder, predictor = load_jepa()

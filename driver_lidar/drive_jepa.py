@@ -28,7 +28,7 @@ from utils import FACTS
 DEVICE = "cpu"              # the game needs the graphics card; 9 options x 10 steps take a few ms on the CPU
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
 STEPS = 10                  # 10 x 0.05 s = 0.5 s of imagination (best in the offline test)
-THROTTLE = 0.05             # constant; the training data had 0.03 .. 0.09
+THROTTLE = 0.08             # constant; the training data had 0.03 .. 0.09
 SMOOTH = 0.01               # penalty per unit of steering change (0.01 = 10 cm of wall distance) -> less zig-zag
 RESET_PAUSE = 30            # messages to ignore the collision counter after a reset (the game needs a moment)
 PRINT_EVERY = 60            # ~1 s
