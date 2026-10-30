@@ -7,7 +7,6 @@
 
 import numpy as np
 import torch
-import torch.nn as nn
 from jepa.jepa_model import LATENT
 from utils import load_pairs
 from utils import DEVICE

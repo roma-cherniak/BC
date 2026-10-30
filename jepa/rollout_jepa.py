@@ -1,17 +1,11 @@
 import torch
 from jepa.jepa_model import LATENT
-import numpy as np
-import torch.nn as nn
 import random
 import matplotlib.pyplot as plt
-from utils import load_pairs, DEVICE, load_jepa
+from utils import load_pairs, load_jepa
 
 
 
-BATCH = 256
-LR = 0.001
-PROBE_EPOCHS = 20
-TRAIN_MOMENTS = 100000
 STEPS = 20 # 1 second
 
 
@@ -56,7 +50,7 @@ def rollout_error():
         for i in range(STEPS):
 
             latent_prediction = predictor(latent_prediction, action[starts + i], speed[starts + i])
-            latent_prediction = latent_prediction / latent_prediction.norm(dim=1, keepdim=True) * 32 ** 0.5
+            latent_prediction = latent_prediction / latent_prediction.norm(dim=1, keepdim=True) * LATENT ** 0.5
             real_latent = encoder(lidar_now[starts + i + 1].float())
 
             loss = ((real_latent - latent_prediction) ** 2).mean().item()

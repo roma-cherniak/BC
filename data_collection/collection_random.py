@@ -1,10 +1,6 @@
 import eventlet
 import eventlet.wsgi
 import socketio
-import base64
-import gzip
-import csv 
-import time
 from data_collection.packet import read_packet
 import random 
 from data_collection.policy import decide, reset_policy

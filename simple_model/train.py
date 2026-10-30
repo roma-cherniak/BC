@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 from simple_model.model import NeuralModel
 import time

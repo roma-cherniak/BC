@@ -4,10 +4,7 @@
 # Run from the BC folder:  venv\Scripts\python jepa\driver_batch.py
 
 import random
-import numpy as np
 import torch
-import torch.nn as nn
-from jepa.jepa_model import LATENT
 from utils import load_pairs, DEVICE
 from utils import load_jepa, load_zond
 

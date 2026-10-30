@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 from jepa.jepa_model import Encoder, Predictor
 import time

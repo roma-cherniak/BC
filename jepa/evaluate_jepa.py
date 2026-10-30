@@ -1,6 +1,5 @@
 import torch
 from jepa.jepa_model import Encoder, LATENT
-import numpy as np
 import torch.nn as nn
 from utils import load_pairs, DEVICE, FACTS
 
@@ -11,8 +10,8 @@ LR = 0.001
 PROBE_EPOCHS = 20
 TRAIN_MOMENTS = 100000
 
-torch.manual_seed(0)                                  # the same random moments and random encoder every run
 
+torch.manual_seed(0)                                  # the same random moments and random encoder every run
 
 
 def make_targets(lidar_now, action, speed):
