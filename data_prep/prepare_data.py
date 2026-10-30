@@ -50,5 +50,6 @@ def prepare_split(name):
     print(name, "pairs:", sum(len(a) for a in all_now))
 
 
-for name in ["train", "val", "test"]:
-    prepare_split(name)
+if __name__ == "__main__":         # only when this file is run, not when another file imports it
+    for name in ["train", "val", "test"]:
+        prepare_split(name)

@@ -5,11 +5,10 @@ import glob
 import os
 import numpy as np
 from config import (DATA_DIR, THROTTLE_MIN, THROTTLE_MAX, EPISODE_TIME, BRAKE_TIME,
-                    WAIT_MIN, WAIT_MAX, RECORD_STEP)     # the same numbers collection_random.py uses
+                    WAIT_MIN, WAIT_MAX, RECORD_STEP, LIDAR_BEAMS)     # the same numbers collection_random.py uses
 
 MODES = ("random", "gap", "safety")   # who steered (policy.py)
 
-BEAMS = 1081            # lidar beams in one scan
 MAX_STEER_RAD = 0.5236  # full steering (30 degrees) in radians
 LAG_GAP = 0.1           # time gap between two rows bigger than this = the game was slow for a moment (s)
 MAX_GAP = 0.2           # bigger than this = the game froze -> problem (s)
@@ -28,7 +27,7 @@ def check_shapes(d):
     for k in ROW_KEYS:
         if len(d[k]) != rows:
             problems.append(f"{k} has {len(d[k])} rows, time has {rows}")
-    if d["lidar"].shape[1:] != (BEAMS,):
+    if d["lidar"].shape[1:] != (LIDAR_BEAMS,):
         problems.append(f"lidar shape {d['lidar'].shape}")
     if d["position"].shape[1:] != (2,):
         problems.append(f"position shape {d['position'].shape}")

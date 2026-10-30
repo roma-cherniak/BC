@@ -19,7 +19,7 @@ import torch
 import torch.nn as nn
 
 from jepa.jepa_model import Encoder, Predictor, LATENT
-from config import FACTS, THROTTLE_MAX, SPEED_MAX
+from config import FACTS, THROTTLE_MAX, SPEED_MAX, MAX_RANGE
 from core.sensors import read_laser, clean_lidar
 
 
@@ -99,7 +99,8 @@ def bridge(sid, data):
         reset = "True"
 
     seconds = time.time() - state["start"]
-    front, right, left = lidar[130:141].min() * 10, lidar[40:51].min() * 10, lidar[220:231].min() * 10
+    front, right, left = (lidar[130:141].min() * MAX_RANGE, lidar[40:51].min() * MAX_RANGE,
+                          lidar[220:231].min() * MAX_RANGE)                          # back to meters for the log
     writer.writerow([round(seconds, 2), state["steering"], speed, round(front, 2), round(right, 2),
                      round(left, 2), state["crashes"]])
     if state["packets"] % PRINT_EVERY == 0:

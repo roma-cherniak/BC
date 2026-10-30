@@ -15,6 +15,7 @@ THROTTLE_MIN = 0.03             # random throttle while driving
 THROTTLE_MAX = 0.09             # ... and the scale for the model: throttle / THROTTLE_MAX
 
 # --- what the model sees: prepare_data.py and the driver must clean the lidar the same way
+LIDAR_BEAMS = 1081              # beams in one raw scan from the game
 BEAM_STEP = 4                   # keep every 4th lidar beam: 1081 -> 271
 MAX_RANGE = 10                  # m, farther walls count as 10; lidar / MAX_RANGE -> 0..1
 SPEED_MAX = 3                   # m/s, the model gets speed / SPEED_MAX
