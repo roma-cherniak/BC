@@ -1,12 +1,13 @@
 # Code check: small tests with assert. If one of them fails, the numbers of the other checks can't be trusted.
 # Run from the BC folder:  venv\Scripts\python -m checks.check_code
 
+import sys
 import numpy as np
 import torch
-from jepa.jepa_model import LATENT, LIDAR
+from core.models import LATENT, LIDAR, load_run
 from core.sigreg import sigreg
-from utils import load_pairs, load_jepa, load_zond
-from config import FACTS, LIDAR_BEAMS, MAX_RANGE
+from core.data import load_pairs
+from config import FACTS, LIDAR_BEAMS, MAX_RANGE, DEVICE, CURRENT_RUN
 from core.sensors import clean_lidar
 
 
@@ -72,6 +73,5 @@ def check_code(encoder, predictor, zond, test):
 
 if __name__ == "__main__":
     test = load_pairs("test")
-    encoder, predictor = load_jepa()
-    zond = load_zond("zond.pt")
+    encoder, predictor, zond = load_run(sys.argv[1] if len(sys.argv) > 1 else CURRENT_RUN, DEVICE)
     print(check_code(encoder, predictor, zond, test))

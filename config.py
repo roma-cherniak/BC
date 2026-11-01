@@ -4,6 +4,8 @@
 # --- where things run and live
 DEVICE = "cuda"                 # training and checks; the sim driver uses its own "cpu"
 DATA_DIR = "data/random_practice"
+RUNS_DIR = "runs"               # one trained model = one folder runs/<name>/ (encoder, predictor, zond, loss, reports)
+CURRENT_RUN = "k10_50ep"        # the model a check or an old script loads when you give it no name
 
 # --- recording: collection_random.py writes it, checks/check_data.py checks it
 RECORD_STEP = 0.05              # s between two rows

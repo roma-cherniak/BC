@@ -8,7 +8,9 @@ import numpy as np
 import torch
 from core.data import load_pairs
 from core.planner import STEERING, score_options
-from utils import load_jepa, load_zond
+import sys
+from core.models import load_run
+from config import DEVICE, CURRENT_RUN
 
 
 DANGER_WINDOW = 10      # 10 x 0.05 s = 0.5 s: if safety had to save the car or it crashed -> danger
@@ -69,6 +71,5 @@ def check_planner(encoder, predictor, zond, test):
 
 if __name__ == "__main__":
     test = load_pairs("test")
-    encoder, predictor = load_jepa()
-    zond = load_zond("zond.pt")
+    encoder, predictor, zond = load_run(sys.argv[1] if len(sys.argv) > 1 else CURRENT_RUN, DEVICE)
     print(check_planner(encoder, predictor, zond, test))

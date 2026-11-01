@@ -16,14 +16,15 @@ import eventlet
 import eventlet.wsgi
 import socketio
 import torch
-import torch.nn as nn
 
-from jepa.jepa_model import Encoder, Predictor, LATENT
-from config import FACTS, THROTTLE_MAX, SPEED_MAX, MAX_RANGE
+from config import THROTTLE_MAX, SPEED_MAX, MAX_RANGE, RUNS_DIR
+from core.models import load_run
 from core.sensors import read_laser, clean_lidar
 from core.planner import STEERING, score_options
 
 
+MODEL = "k10_50ep"          # which model drives: runs/<MODEL>/
+TRACK = "practice"          # which sim build is open: the log goes to runs/<MODEL>/drive_<TRACK>.csv
 DEVICE = "cpu"              # the game needs the graphics card; 9 options x 10 steps take a few ms on the CPU
 THROTTLE = 0.08             # constant; the training data had 0.03 .. 0.09
 SMOOTH = 0.01               # penalty per unit of steering change (0.01 = 10 cm of wall distance) -> less zig-zag
@@ -31,19 +32,14 @@ RESET_PAUSE = 30            # messages to ignore the collision counter after a r
 PRINT_EVERY = 60            # ~1 s
 
 
-encoder = Encoder().to(DEVICE)
-encoder.load_state_dict(torch.load("jepa_encoder.pt", map_location=DEVICE))
-predictor = Predictor().to(DEVICE)
-predictor.load_state_dict(torch.load("jepa_predoctor.pt", map_location=DEVICE))
-zond = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)
-zond.load_state_dict(torch.load("zond.pt", map_location=DEVICE))
+encoder, predictor, zond = load_run(MODEL, DEVICE)
 
 OPTIONS = torch.tensor(STEERING, device=DEVICE)
 
 
 sio = socketio.Server()
 state = {"packets": 0, "steering": 0.0, "pause": 0, "crashes": 0, "start": None, "plan_ms": 0.0}
-log_file = open("drive_log.csv", "w", newline="")
+log_file = open(f"{RUNS_DIR}/{MODEL}/drive_{TRACK}.csv", "w", newline="")    # a new drive replaces the old log
 writer = csv.writer(log_file)
 writer.writerow(["seconds", "steering", "speed", "real_front", "real_right", "real_left", "crashes"])
 

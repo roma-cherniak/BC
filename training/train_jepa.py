@@ -1,10 +1,15 @@
+import os
+import json
+import datetime
 import torch
-from jepa.jepa_model import Encoder, Predictor
+from core.models import Encoder, Predictor
 import time
 import csv
 from core.sigreg import sigreg
 from core.data import load_pairs, safe_starts
-from config import DEVICE
+from config import DEVICE, DATA_DIR, RUNS_DIR
+
+RUN = "k10_50ep"            # the name of the NEW model: change it before every new training
 
 BATCH = 256
 LR = 0.001
@@ -12,7 +17,13 @@ EPOCHS = 50
 SIGREG_WEIGHT = 0.09
 K = 10
 
-log_file = open('jepa_loss.csv', 'w', newline='') 
+FOLDER = f"{RUNS_DIR}/{RUN}"
+os.makedirs(FOLDER)         # no exist_ok: if this model already exists, the training stops here and overwrites nothing
+with open(f"{FOLDER}/settings.json", "w") as f:
+    json.dump({"K": K, "EPOCHS": EPOCHS, "LR": LR, "BATCH": BATCH, "SIGREG_WEIGHT": SIGREG_WEIGHT,
+               "DATA_DIR": DATA_DIR, "date": datetime.datetime.now().isoformat(timespec="minutes")}, f, indent=2)
+
+log_file = open(f"{FOLDER}/loss.csv", 'w', newline='')
 writer = csv.writer(log_file)                         # a helper that writes CSV rows for us
 writer.writerow(['epoch', 'train_loss', 'val_loss', 'spread', 'copy_loss', 'sigreg'])      # the header row: column names
 
@@ -91,8 +102,8 @@ for epoch in range(EPOCHS):
     loss, sigloss = train_one_epoch(train)
     v_loss, copy_loss, spread = val_loss(val)
 
-    torch.save(predictor.state_dict(), "jepa_predoctor.pt")
-    torch.save(encoder.state_dict(), "jepa_encoder.pt")
+    torch.save(predictor.state_dict(), f"{FOLDER}/predictor.pt")
+    torch.save(encoder.state_dict(), f"{FOLDER}/encoder.pt")
     print("model saved")
     print(f"epoch {epoch}  train {loss:.7f}  val {v_loss:.7f} spread {spread:.7} copy_loss {copy_loss:.7} sigloss {sigloss}")
     print(f"time - {time.time() - t0:.0f}")

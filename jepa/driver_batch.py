@@ -5,9 +5,9 @@
 
 import random
 import torch
-from utils import load_pairs
-from utils import load_jepa, load_zond
-from config import DEVICE
+from core.data import load_pairs
+from core.models import load_run
+from config import DEVICE, CURRENT_RUN
 
 
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
@@ -27,8 +27,7 @@ def score(facts):
 
 lidar_now, action, speed, lidar_next = load_pairs("test")
 
-encoder, predictor = load_jepa()
-zond = load_zond("zond.pt")
+encoder, predictor, zond = load_run(CURRENT_RUN, DEVICE)
 
 # safe starts: all STEPS steps stay inside one trip (the domino trick from rollout_curve.py)
 same = (lidar_next[:-1] == lidar_now[1:]).all(dim=1).cpu()      # on the CPU the loop below is much faster

@@ -1,8 +1,8 @@
 import torch
-from jepa.jepa_model import Encoder, LATENT
+from core.models import Encoder, LATENT
 import torch.nn as nn
-from utils import load_pairs
-from config import DEVICE, FACTS, FRONT, RIGHT, LEFT, FRONT_RIGHT, FRONT_LEFT
+from core.data import load_pairs
+from config import DEVICE, FACTS, FRONT, RIGHT, LEFT, FRONT_RIGHT, FRONT_LEFT, RUNS_DIR, CURRENT_RUN
 
 
 
@@ -62,10 +62,9 @@ def probe_r2(encoder):
 
 
 model = Encoder().to(DEVICE)
-model.load_state_dict(torch.load("jepa_encoder.pt", map_location = DEVICE))
+model.load_state_dict(torch.load(f"{RUNS_DIR}/{CURRENT_RUN}/encoder.pt", map_location = DEVICE))
 
-r2_trained, train_zond = probe_r2(model)
-torch.save(train_zond.state_dict(), "zond.pt")
+r2_trained, train_zond = probe_r2(model)        # only the R² table now: training/train_zond.py saves the probe
 r2_random, random_zond = probe_r2(Encoder().to(DEVICE))            # control: the same blueprint, random knobs
 
 print(f"{'fact':<10}{'trained':>10}{'random':>10}")

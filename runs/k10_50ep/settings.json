@@ -1,0 +1,11 @@
+{
+  "K": 10,
+  "EPOCHS": 50,
+  "LR": 0.001,
+  "BATCH": 256,
+  "SIGREG_WEIGHT": 0.09,
+  "DATA_DIR": "data/random_practice",
+  "split": "data/train.txt, val.txt, test.txt (split_data.py, seed 42)",
+  "date": "2026-10-26",
+  "note": "written by hand: moved from the BC root (jepa_encoder.pt, jepa_predoctor.pt, zond.pt, jepa_loss.csv)"
+}

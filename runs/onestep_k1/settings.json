@@ -1,0 +1,11 @@
+{
+  "K": 1,
+  "EPOCHS": 50,
+  "LR": 0.001,
+  "BATCH": 256,
+  "SIGREG_WEIGHT": 0.09,
+  "DATA_DIR": "data/random_practice",
+  "split": "data/train.txt, val.txt, test.txt (split_data.py, seed 42)",
+  "date": "2026-10-25",
+  "note": "written by hand: moved from onestep_jepa/ (the 1-step model, its probe has the same 7 facts)"
+}

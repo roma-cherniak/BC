@@ -1,8 +1,9 @@
 import torch
-from jepa.jepa_model import LATENT
+from core.models import LATENT, load_run
 import random
 import matplotlib.pyplot as plt
-from utils import load_pairs, load_jepa
+from core.data import load_pairs
+from config import DEVICE, CURRENT_RUN
 
 
 
@@ -33,7 +34,7 @@ starts = random.sample(safe, 500)
 starts = torch.tensor(starts)                   
 
 
-encoder, predictor = load_jepa()
+encoder, predictor, _ = load_run(CURRENT_RUN, DEVICE, with_zond=False)
 
 def rollout_error():
 

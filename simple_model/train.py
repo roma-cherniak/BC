@@ -2,7 +2,7 @@ import torch
 from simple_model.model import NeuralModel
 import time
 import csv
-from utils import load_pairs
+from core.data import load_pairs
 from config import DEVICE
 
 

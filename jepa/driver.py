@@ -1,6 +1,7 @@
 import torch
-from utils import load_pairs, load_jepa, load_zond
-from config import DEVICE
+from core.data import load_pairs
+from core.models import load_run
+from config import DEVICE, CURRENT_RUN
 
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
 MOMENT = 1000
@@ -13,9 +14,7 @@ test = load_pairs("test")
 lidar_now, action, speed, lidar_next = test
 
 
-encoder, predictor = load_jepa()
-
-zond = load_zond("zond.pt")
+encoder, predictor, zond = load_run(CURRENT_RUN, DEVICE)
 
 
 with torch.no_grad():

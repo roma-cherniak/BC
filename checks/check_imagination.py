@@ -1,8 +1,10 @@
+import sys
 import torch
 import random
 from core.data import load_pairs, safe_starts
 from core.imagine import imagine_step
-from utils import load_jepa
+from core.models import load_run
+from config import DEVICE, CURRENT_RUN
 
 
 
@@ -47,7 +49,7 @@ def check_imagination(encoder, predictor, test):
 
 if __name__ == "__main__":
     test = load_pairs("test")
-    encoder, predictor = load_jepa()
+    encoder, predictor, _ = load_run(sys.argv[1] if len(sys.argv) > 1 else CURRENT_RUN, DEVICE, with_zond=False)
     print(check_imagination(encoder, predictor, test))
 
 

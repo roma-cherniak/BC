@@ -1,6 +1,6 @@
 # Imagination: one step of the predictor, with or without guard B.
 
-from jepa.jepa_model import LATENT
+from core.models import LATENT
 
 
 def imagine_step(predictor, z, act, spd, guard):

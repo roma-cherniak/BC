@@ -7,17 +7,15 @@
 
 import numpy as np
 import torch
-from jepa.jepa_model import LATENT
-from utils import load_pairs
-from utils import load_jepa, load_zond
-from config import DEVICE, WALLS
+from core.models import LATENT, load_run
+from core.data import load_pairs
+from config import DEVICE, WALLS, CURRENT_RUN
 
 
 STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
 STEPS = 20              # 20 x 0.05 s = 1 s of imagination
 DANGER_WINDOW = 10      # 10 x 0.05 s = 0.5 s: if safety had to save the car or it crashed -> danger
 BRAKE_TIME = 27.5       # s, after this the trip brakes to the end, skip those moments
-ZOND_FILE = "zond.pt"                   # probe on real states (evaluate_jepa.py); "zond_imagined.pt" was worse
 BINS = [0, 0.5, 1.0, 1.5, 2.01]     # |real steering - brain choice|
 
 
@@ -54,8 +52,7 @@ starts = np.flatnonzero((modes == "random") & (times < BRAKE_TIME) & judge)
 danger = torch.from_numpy(danger[starts]).to(DEVICE)
 starts = torch.from_numpy(starts).to(DEVICE)
 
-encoder, predictor = load_jepa()
-zond = load_zond(ZOND_FILE)
+encoder, predictor, zond = load_run(CURRENT_RUN, DEVICE)       # its zond.pt = probe on real states
 
 M, K = len(starts), len(STEERING)
 with torch.no_grad():                                           # the same imagination as driver_batch.py
