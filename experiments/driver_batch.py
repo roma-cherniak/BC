@@ -1,7 +1,7 @@
 # Planner test on many moments: for every start moment the JEPA brain imagines every steering option
 # for STEPS steps, the probe reads the walls, and the option with the best score wins.
 # Then we compare the brain's choice with what the real driver (find_gap + noise) did at that moment.
-# Run from the BC folder:  venv\Scripts\python jepa\driver_batch.py
+# Run from the BC folder:  venv\Scripts\python -m experiments.driver_batch
 
 import random
 import torch

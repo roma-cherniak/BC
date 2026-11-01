@@ -2,7 +2,7 @@
 # Here the probe learns on imagined states: the brain imagines 1..STEPS steps with the real actions,
 # and the probe must read the REAL walls at the same moment.
 # Saves zond_imagined.pt (the same shape as zond.pt, so planner_test.py can load it).
-# Run from the BC folder:  venv\Scripts\python jepa\imagined_probe.py
+# Run from the BC folder:  venv\Scripts\python -m experiments.imagined_probe
 
 import random
 import numpy as np
