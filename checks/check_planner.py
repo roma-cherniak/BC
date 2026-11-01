@@ -19,7 +19,7 @@ AGREE = 0.5             # |coin - brain| below this = the coin steered like the 
 
 
 def trip_info(name):
-    """for every pair: mode, time, danger soon (safety or crash within DANGER_WINDOW), enough future to judge"""
+
     modes, times, danger, judge = [], [], [], []
     for file in open(f"data/{name}.txt").read().split("\n"):
         with np.load(file) as f:
@@ -38,7 +38,7 @@ def trip_info(name):
 
 
 def brain_choice(encoder, predictor, zond, lidar_now, action, speed, starts):
-    """for every start: the safest of the 9 steering options (the same planner as the driver)"""
+   
     scores = score_options(encoder, predictor, zond, lidar_now[starts], action[starts, 0], speed[starts])   # (M, 9)
     return torch.tensor(STEERING, device=lidar_now.device)[scores.argmax(dim=1)]
 
@@ -54,19 +54,18 @@ def check_planner(encoder, predictor, zond, test):
     starts = torch.from_numpy(starts).to(device)
 
     best = brain_choice(encoder, predictor, zond, lidar_now, action, speed, starts)
-    real = action[starts, 1]                                         # what the coin really did
-    dice = torch.Generator(device=device).manual_seed(0)             # own dice: the global seed stays untouched
+    real = action[starts, 1]                                         
+    dice = torch.Generator(device=device).manual_seed(0)            
     control = best[torch.randperm(len(best), generator=dice, device=device)]
 
-    agree = (real - best).abs() < AGREE                              # the coin steered like the brain
-    agree_control = (real - control).abs() < AGREE                   # ... like the shuffled brain
-
-    # TODO(human): the number from the table: danger in the agree moments minus danger in the
-    # agree_control moments, in percentage points (−10.5 for the current model)
+    agree = (real - best).abs() < AGREE                             
+    agree_control = (real - control).abs() < AGREE                  
 
 
+    brain = danger[agree].float().mean()
+    control = danger[agree_control].float().mean()
 
-    return {"planner_agree_vs_control": ...}
+    return {"planner_agree_vs_control": ((brain - control) * 100).item()}
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 # for 9 steering options, the probe reads the walls on the WHOLE imagined path, and the option whose closest wall
 # stays farthest away is sent to the game.
 # The settings (score, STEPS, no norm guard) won an offline test on the "random" test moments
-# (the natural experiment of jepa/planner_test.py): moments where the coin steered like this planner
+# (the natural experiment, now checks/check_planner.py): moments where the coin steered like this planner
 # were in danger 35.2 % of the time vs 50.1 % for the same choices shuffled between moments
 # (your old sum front + right + left at 20 steps: 45.6 % vs 49.6 %).
 #

@@ -1,5 +1,6 @@
 {
   "run": "k10_50ep",
-  "date": "2026-11-01T20:47",
-  "1 s, quess loss / copy loss": 0.23111899325157234
+  "date": "2026-11-01T21:02",
+  "1 s, quess loss / copy loss": 0.23111897696867698,
+  "planner_agree_vs_control": -14.894947052001953
 }

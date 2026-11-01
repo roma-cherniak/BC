@@ -30,6 +30,5 @@ Run every command from the `BC` folder. One sim at a time, and never the sim and
 | `checks/` | the checks and the report (`run_all`, `compare`) |
 | `driver_lidar/` | the driver for the sim |
 | `runs/<run>/` | one trained model: encoder, predictor, zond, loss, settings, reports, drive logs |
-| `jepa/` | old scripts still waiting for their checks (`planner_test`, `evaluate_jepa`) |
 | `experiments/` | one-off experiments; fix their imports only if you run them again |
 | `archive/` | stage A (MLP) and old files, not used any more |

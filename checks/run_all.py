@@ -12,7 +12,8 @@ from core.models import load_run
 from checks.check_code import check_code
 from checks.check_imagination import check_imagination
 from config import DEVICE, RUNS_DIR, CURRENT_RUN
-
+from checks.check_planner import check_planner
+from checks.check_training import check_training
 
 def drive_results(folder):
     # crashes per minute from every runs/<name>/drive_<track>.csv the driver wrote
@@ -41,6 +42,8 @@ if not check_code(encoder, predictor, zond, test)["code_ok"]:
 results = {}
 results.update(check_imagination(encoder, predictor, test))
 results.update(drive_results(folder))
+results.update(check_planner(encoder, predictor, zond, test))
+results.update(check_training(folder))
 
 with open(f"{folder}/report.json", "w") as f:
     json.dump({"run": run, "date": datetime.datetime.now().isoformat(timespec="minutes"), **results}, f, indent=2)
@@ -51,3 +54,5 @@ with open(f"{folder}/report.md", "w", encoding="utf-8") as f:
 
 print(results)
 print("saved", f"{folder}/report.md", "and report.json")
+
+
