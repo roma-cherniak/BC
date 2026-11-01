@@ -21,22 +21,14 @@ import torch.nn as nn
 from jepa.jepa_model import Encoder, Predictor, LATENT
 from config import FACTS, THROTTLE_MAX, SPEED_MAX, MAX_RANGE
 from core.sensors import read_laser, clean_lidar
+from core.planner import STEERING, score_options
 
 
 DEVICE = "cpu"              # the game needs the graphics card; 9 options x 10 steps take a few ms on the CPU
-STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
-STEPS = 10                  # 10 x 0.05 s = 0.5 s of imagination (best in the offline test)
 THROTTLE = 0.08             # constant; the training data had 0.03 .. 0.09
 SMOOTH = 0.01               # penalty per unit of steering change (0.01 = 10 cm of wall distance) -> less zig-zag
 RESET_PAUSE = 30            # messages to ignore the collision counter after a reset (the game needs a moment)
 PRINT_EVERY = 60            # ~1 s
-
-
-def score(facts):
-    """the closest wall, where a diagonal counts /1.4 (in a corridor it is naturally ~1.4x farther) and the front /2:
-    bigger = safer"""
-    walls = torch.stack([facts[:, 1], facts[:, 2], facts[:, 5] / 1.4, facts[:, 6] / 1.4, facts[:, 0] / 2], dim=1)
-    return walls.min(dim=1).values
 
 
 encoder = Encoder().to(DEVICE)
@@ -46,22 +38,7 @@ predictor.load_state_dict(torch.load("jepa_predoctor.pt", map_location=DEVICE))
 zond = nn.Sequential(nn.Linear(LATENT, 256), nn.ReLU(), nn.Linear(256, len(FACTS))).to(DEVICE)
 zond.load_state_dict(torch.load("zond.pt", map_location=DEVICE))
 
-K = len(STEERING)
 OPTIONS = torch.tensor(STEERING, device=DEVICE)
-
-
-def plan(lidar, speed, previous):
-    """lidar: 271 cleaned beams, speed in m/s, previous: the last steering -> the best steering (a plain number)"""
-    with torch.no_grad():
-        z = encoder(torch.tensor(lidar, dtype=torch.float32, device=DEVICE)[None]).repeat(K, 1)   # (9, 32)
-        act = torch.stack([torch.full((K,), THROTTLE / THROTTLE_MAX, device=DEVICE), OPTIONS], dim=1)       # (9, 2)
-        spd = torch.full((K, 1), speed / SPEED_MAX, device=DEVICE)                                           # (9, 1)
-        worst = torch.full((K,), float("inf"), device=DEVICE)   # the closest wall on the whole imagined path
-        for _ in range(STEPS):
-            z = predictor(z, act, spd)
-            worst = torch.minimum(worst, score(zond(z).clamp(0, 1)))
-        worst = worst - SMOOTH * (OPTIONS - previous).abs()
-    return STEERING[worst.argmax().item()]
 
 
 sio = socketio.Server()
@@ -87,7 +64,12 @@ def bridge(sid, data):
     speed = float(data["V1 Speed"])
 
     t0 = time.perf_counter()
-    state["steering"] = plan(lidar, speed, state["steering"])
+    lidar_t = torch.tensor(lidar, dtype=torch.float32, device=DEVICE)[None]                 # (1, 271): M = 1 moment
+    throttle_t = torch.tensor([THROTTLE / THROTTLE_MAX], device=DEVICE)                     # (1,)
+    speed_t = torch.tensor([[speed / SPEED_MAX]], device=DEVICE)                            # (1, 1)
+    scores = score_options(encoder, predictor, zond, lidar_t, throttle_t, speed_t)[0]       # (9,)
+    scores = scores - SMOOTH * (OPTIONS - state["steering"]).abs()                           # less zig-zag
+    state["steering"] = STEERING[scores.argmax().item()]
     state["plan_ms"] = (time.perf_counter() - t0) * 1000
 
     if state["pause"] > 0:                                  # just reset: the counter may still show the old crash

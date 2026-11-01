@@ -7,20 +7,13 @@
 import numpy as np
 import torch
 from core.data import load_pairs
-from core.imagine import imagine_step
+from core.planner import STEERING, score_options
 from utils import load_jepa, load_zond
-from config import WALLS
 
 
-STEERING = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
-STEPS = 20              # 20 x 0.05 s = 1 s of imagination
 DANGER_WINDOW = 10      # 10 x 0.05 s = 0.5 s: if safety had to save the car or it crashed -> danger
 BRAKE_TIME = 27.5       # s, after this the trip brakes to the end, skip those moments
 AGREE = 0.5             # |coin - brain| below this = the coin steered like the brain
-
-
-def score(facts):
-    return facts[:, WALLS].min(dim=1).values
 
 
 def trip_info(name):
@@ -43,19 +36,9 @@ def trip_info(name):
 
 
 def brain_choice(encoder, predictor, zond, lidar_now, action, speed, starts):
-    """for every start: imagine all 9 steering options for STEPS steps, return the safest steering"""
-    device = lidar_now.device
-    M, K = len(starts), len(STEERING)
-    options = torch.tensor(STEERING, device=device)
-    with torch.no_grad():
-        z = encoder(lidar_now[starts].float()).repeat_interleave(K, dim=0)
-        act = torch.stack([action[starts, 0].repeat_interleave(K), options.repeat(M)], dim=1)
-        spd = speed[starts].repeat_interleave(K, dim=0)
-        worst = torch.full((M * K,), float("inf"), device=device)    # the closest wall on the WHOLE imagined path
-        for i in range(STEPS):
-            z = imagine_step(predictor, z, act, spd, guard=True)
-            worst = torch.minimum(worst, score(zond(z).clamp(0, 1)))
-    return options[worst.view(M, K).argmax(dim=1)]
+    """for every start: the safest of the 9 steering options (the same planner as the driver)"""
+    scores = score_options(encoder, predictor, zond, lidar_now[starts], action[starts, 0], speed[starts])   # (M, 9)
+    return torch.tensor(STEERING, device=lidar_now.device)[scores.argmax(dim=1)]
 
 
 def check_planner(encoder, predictor, zond, test):
