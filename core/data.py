@@ -17,3 +17,10 @@ def safe_starts(lidar_now, lidar_next, steps):
     same = (lidar_next[:-1] == lidar_now[1:]).all(dim=1).cpu()      # on the CPU the loop below is much faster
     safe = [i for i in range(len(same) - steps) if same[i : i + steps].all()]
     return torch.tensor(safe, device=lidar_now.device)
+
+
+
+def load_images(name, device = DEVICE):
+    d = np.load(f"data/random_practice/drive_0001.npz")
+    image = (d['image'])
+    return image
