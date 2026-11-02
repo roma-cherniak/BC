@@ -22,6 +22,11 @@ BEAM_STEP = 4                   # keep every 4th lidar beam: 1081 -> 271
 MAX_RANGE = 10                  # m, farther walls count as 10; lidar / MAX_RANGE -> 0..1
 SPEED_MAX = 3                   # m/s, the model gets speed / SPEED_MAX
 
+
+#prepare photo
+PHOTO_WIDTH = 64
+PHOTO_HEIGHT = 36
+
 # --- what the probe reads, in this order (zond.pt has len(FACTS) outputs)
 FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
 FRONT = slice(130, 140)         # lidar beams of every wall (271 beams, index = angle + 135)

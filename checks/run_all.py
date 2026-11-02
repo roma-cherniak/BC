@@ -7,7 +7,7 @@ import glob
 import json
 import os
 import sys
-from core.data import load_pairs
+from core.data import load_pairs, load_photos
 from core.models import load_run
 from checks.check_code import check_code
 from checks.check_imagination import check_imagination
@@ -29,10 +29,21 @@ def drive_results(folder):
     return results
 
 
+def run_input(run):
+    settings = json.load(open(f"{RUNS_DIR}/{run}/settings.json"))
+    return settings.get("INPUT", "lidar")      
+
 run = sys.argv[1] if len(sys.argv) > 1 else CURRENT_RUN
 folder = f"{RUNS_DIR}/{run}"
-test = load_pairs("test")
+kind = run_input(run)
+if kind != "photo": 
+    test = load_pairs("test")
+else:
+    test = load_photos("test")
+    
 encoder, predictor, zond = load_run(run, DEVICE)
+
+
 
 
 

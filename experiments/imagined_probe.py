@@ -57,7 +57,6 @@ def safe_starts(data, name, n):
 
 
 def imagine(data, starts):
-    """imagined states after 1..STEPS steps (like the planner: start speed + guard B) and the real facts then"""
     lidar_now, action, speed, lidar_next = data
     zs, facts = [], []
     with torch.no_grad():

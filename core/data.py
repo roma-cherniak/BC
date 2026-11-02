@@ -12,6 +12,14 @@ def load_pairs(name, device=DEVICE):
     lidar_next = torch.from_numpy(d["lidar_next"]).to(device)
     return lidar_now, action, speed, lidar_next
 
+def load_photos(name, device=DEVICE):
+    d = np.load(f"data/{name}_photos.npz")
+    images = torch.from_numpy(d["image"]).to(device)
+    action = torch.from_numpy(d["act"]).float().to(device)
+    speed = torch.from_numpy(d["spd"]).float().to(device)[:, None]
+    trip = torch.from_numpy(d["trip"]).to(device)
+    return images, action, speed, trip
+
 
 def safe_starts(lidar_now, lidar_next, steps):
     same = (lidar_next[:-1] == lidar_now[1:]).all(dim=1).cpu()      # on the CPU the loop below is much faster
