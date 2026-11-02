@@ -18,7 +18,8 @@ def load_photos(name, device=DEVICE):
     action = torch.from_numpy(d["act"]).float().to(device)
     speed = torch.from_numpy(d["spd"]).float().to(device)[:, None]
     trip = torch.from_numpy(d["trip"]).to(device)
-    return images, action, speed, trip
+    lidar = torch.from_numpy(d["lidar"]).to(device)          # the lidar of the same frame: the probe's right answers
+    return images, action, speed, trip, lidar
 
 
 def safe_starts(lidar_now, lidar_next, steps):

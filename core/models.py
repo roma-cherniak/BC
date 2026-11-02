@@ -86,12 +86,17 @@ def make_targets(lidar_now, action, speed):
     return torch.stack([facts[name] for name in FACTS], dim=1)
 
 
+def run_input(name):
+    # what the model eats, from runs/<name>/settings.json: "photo", or "lidar" (old models have no INPUT)
+    settings = json.load(open(f"{RUNS_DIR}/{name}/settings.json"))
+    return settings.get("INPUT", "lidar")
+
+
 def load_run(name, device, with_zond=True):
     # runs/<name>/encoder.pt, predictor.pt, zond.pt -> encoder, predictor, zond (zond = None if with_zond=False)
     folder = f"{RUNS_DIR}/{name}"
 
-    settings = json.load(open(f"{folder}/settings.json"))
-    if settings.get("INPUT" ,"lidar") == "photo":
+    if run_input(name) == "photo":
         encoder = ImageEncoder().to(device)
     else :
         encoder = Encoder().to(device)

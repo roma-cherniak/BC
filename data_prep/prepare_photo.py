@@ -40,14 +40,15 @@ def prepare_photo(name):
             action_list.append(actions)
             speed_list.append(speed)
             trip_list.append(trip)
-            lidar_list.appent(lidar)
+            lidar_list.append(lidar)
 
 
         np.savez(f"data/{name}_photos.npz",
                  image = np.stack(image_list),
                  act = np.concatenate(action_list),
                  spd = np.concatenate(speed_list),
-                 trip = np.concatenate(trip_list))
+                 trip = np.concatenate(trip_list),
+                 lidar = np.concatenate(lidar_list))
 
 
             

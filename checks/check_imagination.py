@@ -1,22 +1,17 @@
-import json
 import sys
 import torch
 import random
 from core.data import load_pairs, safe_starts, load_photos
 from core.imagine import imagine_step
-from core.models import load_run
-from config import DEVICE, CURRENT_RUN, RUNS_DIR
+from core.models import load_run, run_input
+from config import DEVICE, CURRENT_RUN
 
 
 
 
 STEPS = 20 # 1 second
 
-torch.manual_seed(0)   
-
-def run_input(run):
-    settings = json.load(open(f"{RUNS_DIR}/{run}/settings.json"))
-    return settings.get("INPUT", "lidar")      
+torch.manual_seed(0)
 
 
 def check_imagination(encoder, predictor, obs, action, speed , safe):
@@ -56,7 +51,7 @@ if __name__ == "__main__":
     run = sys.argv[1] if len(sys.argv) > 1 else CURRENT_RUN
     encoder, predictor, _ = load_run(run, DEVICE, with_zond=False)
     if run_input(run) == "photo":
-        images, action, speed, trip = load_photos("test")
+        images, action, speed, trip, _ = load_photos("test")
         obs = images[:, None].float() / 255
         safe = torch.nonzero(trip[:-STEPS] == trip[STEPS:]).flatten()
     else:

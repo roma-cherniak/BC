@@ -32,8 +32,8 @@ writer.writerow(['epoch', 'train_loss', 'val_loss', 'spread', 'copy_loss', 'sigr
 
 
 
-train = load_photos("train")
-val = load_photos("val")
+train = load_photos("train")[:4]       # [:4]: without the lidar, the training does not need it
+val = load_photos("val")[:4]
 trip = train[3]
 
 safe = torch.nonzero(trip[:-K] == trip[K:]).flatten() # starts whose K steps stay inside one trip
