@@ -2,14 +2,14 @@ import os
 import json
 import datetime
 import torch
-from core.models import Encoder, Predictor
+from core.models import Encoder, Predictor, LIDAR
 import time
 import csv
 from core.sigreg import sigreg
 from core.data import load_pairs, safe_starts
 from config import DEVICE, DATA_DIR, RUNS_DIR
 
-RUN = "k10_50ep"            # the name of the NEW model: change it before every new training
+RUN = "k10_50ep_b109"       # the name of the NEW model: change it before every new training
 
 BATCH = 256
 LR = 0.001
@@ -21,7 +21,7 @@ FOLDER = f"{RUNS_DIR}/{RUN}"
 os.makedirs(FOLDER)         # no exist_ok: if this model already exists, the training stops here and overwrites nothing
 with open(f"{FOLDER}/settings.json", "w") as f:
     json.dump({"K": K, "EPOCHS": EPOCHS, "LR": LR, "BATCH": BATCH, "SIGREG_WEIGHT": SIGREG_WEIGHT,
-               "DATA_DIR": DATA_DIR, "date": datetime.datetime.now().isoformat(timespec="minutes")}, f, indent=2)
+               "DATA_DIR": DATA_DIR, "BEAMS": LIDAR, "date": datetime.datetime.now().isoformat(timespec="minutes")}, f, indent=2)
 
 log_file = open(f"{FOLDER}/loss.csv", 'w', newline='')
 writer = csv.writer(log_file)                         # a helper that writes CSV rows for us

@@ -1,0 +1,10 @@
+{
+  "K": 10,
+  "EPOCHS": 50,
+  "LR": 0.001,
+  "BATCH": 256,
+  "SIGREG_WEIGHT": 0.09,
+  "DATA_DIR": "data/random_practice",
+  "BEAMS": 109,
+  "date": "2026-11-07T16:58"
+}

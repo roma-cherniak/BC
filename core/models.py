@@ -5,9 +5,10 @@ import json
 import torch
 import torch.nn as nn
 from config import RUNS_DIR, FACTS, FRONT, RIGHT, LEFT, FRONT_RIGHT, FRONT_LEFT, PHOTO_HEIGHT,PHOTO_WIDTH
+from config import LIDAR_BEAMS, BEAM_STEP
 
 
-LIDAR = 271
+LIDAR = len(range(0, LIDAR_BEAMS, BEAM_STEP))   # cleaned beams the encoder eats: 109 for BEAM_STEP 10 (271 for 4)
 ACTION = 2
 SPEED = 1
 LATENT = 32
@@ -16,10 +17,10 @@ HIDDEN = 256
 
 class Encoder(nn.Module):
 
-    def __init__(self):
+    def __init__(self, beams=LIDAR):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(LIDAR, HIDDEN),
+            nn.Linear(beams, HIDDEN),
             nn.ReLU(),
             nn.Linear(HIDDEN, LATENT)
         )
@@ -99,7 +100,8 @@ def load_run(name, device, with_zond=True):
     if run_input(name) == "photo":
         encoder = ImageEncoder().to(device)
     else :
-        encoder = Encoder().to(device)
+        settings = json.load(open(f"{folder}/settings.json"))
+        encoder = Encoder(settings.get("BEAMS", 271)).to(device)        # old models have no BEAMS: they eat 271
     
     encoder.load_state_dict(torch.load(f"{folder}/encoder.pt", map_location=device))
     predictor = Predictor().to(device)

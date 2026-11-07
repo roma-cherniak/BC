@@ -18,7 +18,8 @@ THROTTLE_MAX = 0.09             # ... and the scale for the model: throttle / TH
 
 # --- what the model sees: prepare_data.py and the driver must clean the lidar the same way
 LIDAR_BEAMS = 1081              # beams in one raw scan from the game
-BEAM_STEP = 4                   # keep every 4th lidar beam: 1081 -> 271
+BEAM_STEP = 10                  # keep every 10th lidar beam: 1081 -> 109 at 2.5 degrees = the AIL Cup lidar
+                                # (it was 4: 1081 -> 271, the models before k10_50ep_b109; their pairs: data/beams271/)
 MAX_RANGE = 10                  # m, farther walls count as 10; lidar / MAX_RANGE -> 0..1
 SPEED_MAX = 3                   # m/s, the model gets speed / SPEED_MAX
 
@@ -29,9 +30,17 @@ PHOTO_HEIGHT = 36
 
 # --- what the probe reads, in this order (zond.pt has len(FACTS) outputs)
 FACTS = ["front", "right", "left", "steering", "speed", "front_right", "front_left"]
-FRONT = slice(130, 140)         # lidar beams of every wall (271 beams, index = angle + 135)
-RIGHT = slice(40, 50)           # -90°
-LEFT = slice(220, 230)          # +90°
-FRONT_RIGHT = slice(85, 95)     # -45°
-FRONT_LEFT = slice(175, 185)    # +45°
+
+
+def beams_between(first, last):
+    # the cleaned lidar beams from angle first to last (degrees, -135 = right ... +135 = left), for any BEAM_STEP:
+    # raw beam = (angle + 135) * 4, cleaned beam = raw / BEAM_STEP  (BEAM_STEP 4: 130:140, BEAM_STEP 10: 52:56)
+    return slice(round((first + 135) * 4 / BEAM_STEP), round((last + 135) * 4 / BEAM_STEP))
+
+
+FRONT = beams_between(-5, 5)            # lidar beams of every wall
+RIGHT = beams_between(-95, -85)         # -90°
+LEFT = beams_between(85, 95)            # +90°
+FRONT_RIGHT = beams_between(-50, -40)   # -45°
+FRONT_LEFT = beams_between(40, 50)      # +45°
 WALLS = [FACTS.index(name) for name in ["front", "right", "left", "front_right", "front_left"]]   # [0, 1, 2, 5, 6]

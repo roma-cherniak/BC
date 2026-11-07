@@ -1,0 +1,11 @@
+{
+  "run": "k10_50ep_b109",
+  "input": "lidar",
+  "date": "2026-11-07T18:03",
+  "1 s, quess loss / copy loss": 0.2928647259137299,
+  "planner_agree_vs_control": -12.910813331604004,
+  "training epochs": 50,
+  "training val/copy": 0.5649159778773781,
+  "training spread": 1.0095667839050293,
+  "training sigreg": 1.8783668392923623
+}
