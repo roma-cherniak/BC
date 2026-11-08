@@ -1,0 +1,14 @@
+C:\Users\1\Desktop\BP\BC\data_collection\collection_random.py:1: EventletDeprecationWarning: 
+Eventlet is deprecated. It is currently being maintained in bugfix mode, and
+we strongly recommend against using it for new projects.
+
+If you are already using Eventlet, we recommend migrating to a different
+framework.  For more detail see
+https://eventlet.readthedocs.io/en/latest/asyncio/migration.html
+
+  import eventlet
+Door is open, waiting for the game... track practice, trips -> data/fast_practice, next trip 35
+(28488) wsgi starting up on http://127.0.0.1:4567
+(28488) accepted ('127.0.0.1', 64139)
+Connected! Caller ID: b8a198c47f3e46458f2f0e66a6a30974
+127.0.0.1 - - [08/Nov/2026 13:32:12] "GET /socket.io/?EIO=4&transport=websocket HTTP/1.1" 200 0 36797.523701

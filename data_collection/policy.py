@@ -16,14 +16,15 @@ THROTTLE_HOLD = (1, 3)          # s, one throttle value is kept this long
 BRAKE_SHARE = 0.1               # share of throttle picks that are a brake pulse (throttle 0)
 BRAKE_PULSE = (0.1, 0.4)        # s: throttle 0 brakes hard (1.4 m/s -> 0 in 0.3 s), so only short pulses
 DECEL = 4.0                     # m/s2, measured braking of throttle 0 (4.3 in the first 0.15 s)
-WARMUP_THROTTLE = 0.07          # warm-up drives to a random place on the track: not too fast
+RANDOM_THROTTLE = 0.12          # random steering: not faster than ~2.9 m/s
+WARMUP_THROTTLE = 0.07         # warm-up drives to a random place on the track: not too fast
 SAFETY_BRAKE_SPEED = 2.0        # m/s: faster than this, safety brakes (throttle 0) instead of only slowing down
 MODE_HOLD = (2, 5)              # s, one driving mode is kept this long
 RANDOM_SHARE = 0.6              # how often the "random" mode is chosen (else "gap")
 RANDOM_HOLD = (0.2, 1.2)        # s, one random steering value is kept this long
 SAFE_FRONT = 0.75                # m, wall closer than this in front (±20°) -> safety
 SAFE_AROUND = 0.3               # m, wall closer than this anywhere in ±90° -> safety
-SAFETY_TIME = 0.5              # s, safety keeps driving this long after the danger
+SAFETY_TIME = 0.3             # s, safety keeps driving this long after the danger
 SAFETY_THROTTLE = 0.04          # slow down while saving the car
 
 last_time = 0
@@ -175,5 +176,7 @@ def decide(ranges, time, warming_up, speed=0.0):
         return save_throttle, find_gap(ranges), "safety"
 
     if pick_mode(time) == "random":
-        return throttle, random_steering_at(time), "random"
+        # random steering at 4 m/s on the tight practice track only crashes (try run: 60 % crash trips): the coin
+        # steers at moderate speeds, the fast driving comes from "gap" (find_gap + noise) with the full throttle
+        return min(throttle, RANDOM_THROTTLE), random_steering_at(time), "random"
     return throttle, add_steering_noise(find_gap(ranges), time), "gap"

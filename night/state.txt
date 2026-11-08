@@ -1,0 +1,5 @@
+2026-11-08 03:18:54  collect: start
+2026-11-08 13:32:41  collect: the simulator was closed -> stop collecting
+2026-11-08 13:32:41  collect: collector stopped
+2026-11-08 13:33:01  train: start wm2_k10, 20 epochs
+2026-11-08 16:54:46  train: finished, exit code 0

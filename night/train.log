@@ -1,0 +1,21 @@
+encoder 359,520 + predictor 1,221,697 numbers; 676,241 train windows, 82,759 val windows
+epoch 0  pred 0.1050  speed 0.01052  sigreg 7.47  val pred/copy 0.081  val speed 0.00041  spread 0.986  time 625 s
+epoch 1  pred 0.0343  speed 0.00034  sigreg 1.87  val pred/copy 0.055  val speed 0.00044  spread 0.985  time 626 s
+epoch 2  pred 0.0247  speed 0.00026  sigreg 1.43  val pred/copy 0.045  val speed 0.00021  spread 1.002  time 607 s
+epoch 3  pred 0.0203  speed 0.00021  sigreg 1.28  val pred/copy 0.039  val speed 0.00019  spread 0.988  time 606 s
+epoch 4  pred 0.0175  speed 0.00018  sigreg 1.20  val pred/copy 0.034  val speed 0.00017  spread 0.987  time 630 s
+epoch 5  pred 0.0159  speed 0.00017  sigreg 1.16  val pred/copy 0.034  val speed 0.00016  spread 0.990  time 665 s
+epoch 6  pred 0.0146  speed 0.00016  sigreg 1.11  val pred/copy 0.031  val speed 0.00015  spread 0.985  time 587 s
+epoch 7  pred 0.0134  speed 0.00015  sigreg 1.08  val pred/copy 0.028  val speed 0.00019  spread 0.990  time 576 s
+epoch 8  pred 0.0126  speed 0.00014  sigreg 1.07  val pred/copy 0.027  val speed 0.00014  spread 0.990  time 606 s
+epoch 9  pred 0.0119  speed 0.00014  sigreg 1.04  val pred/copy 0.026  val speed 0.00015  spread 0.989  time 575 s
+epoch 10  pred 0.0112  speed 0.00013  sigreg 1.03  val pred/copy 0.024  val speed 0.00013  spread 0.989  time 563 s
+epoch 11  pred 0.0106  speed 0.00013  sigreg 1.02  val pred/copy 0.023  val speed 0.00013  spread 0.990  time 570 s
+epoch 12  pred 0.0101  speed 0.00013  sigreg 1.01  val pred/copy 0.022  val speed 0.00013  spread 0.987  time 588 s
+epoch 13  pred 0.0097  speed 0.00012  sigreg 0.99  val pred/copy 0.021  val speed 0.00013  spread 0.989  time 558 s
+epoch 14  pred 0.0093  speed 0.00012  sigreg 0.99  val pred/copy 0.021  val speed 0.00012  spread 0.988  time 556 s
+epoch 15  pred 0.0089  speed 0.00012  sigreg 0.99  val pred/copy 0.020  val speed 0.00012  spread 0.992  time 589 s
+epoch 16  pred 0.0086  speed 0.00012  sigreg 0.98  val pred/copy 0.019  val speed 0.00012  spread 0.993  time 587 s
+epoch 17  pred 0.0084  speed 0.00012  sigreg 0.98  val pred/copy 0.019  val speed 0.00012  spread 0.994  time 589 s
+epoch 18  pred 0.0083  speed 0.00012  sigreg 0.98  val pred/copy 0.019  val speed 0.00012  spread 0.990  time 586 s
+epoch 19  pred 0.0082  speed 0.00012  sigreg 0.98  val pred/copy 0.019  val speed 0.00012  spread 0.990  time 803 s
