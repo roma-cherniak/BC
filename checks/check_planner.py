@@ -2,20 +2,21 @@
 # In "random" moments a coin picked the steering. The brain imagines all 9 options and picks the safest.
 # If the brain is right, moments where the coin happened to steer like the brain end in danger less often
 # than the same brain choices shuffled between moments (control).
-# Run from the BC folder:  venv\Scripts\python -m checks.check_planner
+# Run from the BC folder:  venv\Scripts\python -m checks.check_planner k10_50ep
 
 import numpy as np
 import torch
-from core.data import load_pairs
+from core.data import load_pairs, pair_obs
 from core.planner import STEERING, score_options
 import sys
-from core.models import load_run
+from core.models import load_run, run_input
 from config import DEVICE, CURRENT_RUN
 
 
 DANGER_WINDOW = 10      # 10 x 0.05 s = 0.5 s: if safety had to save the car or it crashed -> danger
 BRAKE_TIME = 27.5       # s, after this the trip brakes to the end, skip those moments
 AGREE = 0.5             # |coin - brain| below this = the coin steered like the brain
+CHUNK = 2048            # moments per planner call: all ~20k photo moments at once do not fit into the 4 GB graphics card
 
 
 def trip_info(name):
@@ -37,15 +38,18 @@ def trip_info(name):
     return [np.concatenate(x) for x in (modes, times, danger, judge)]
 
 
-def brain_choice(encoder, predictor, zond, lidar_now, action, speed, starts):
-   
-    scores = score_options(encoder, predictor, zond, lidar_now[starts], action[starts, 0], speed[starts])   # (M, 9)
-    return torch.tensor(STEERING, device=lidar_now.device)[scores.argmax(dim=1)]
+def brain_choice(encoder, predictor, zond, obs, action, speed, starts):
+    best = []
+    for i in range(0, len(starts), CHUNK):
+        s = starts[i : i + CHUNK]
+        scores = score_options(encoder, predictor, zond, obs[s], action[s, 0], speed[s])    # (chunk, 9)
+        best.append(scores.argmax(dim=1))
+    return torch.tensor(STEERING, device=obs.device)[torch.cat(best)]
 
 
-def check_planner(encoder, predictor, zond, test):
-    lidar_now, action, speed, _ = test
-    device = lidar_now.device
+def check_planner(encoder, predictor, zond, obs, action, speed):
+    # obs, action, speed: one row per pair of data/test_pairs.npz (pair_obs gives obs for lidar or photo models)
+    device = obs.device
     modes, times, danger, judge = trip_info("test")
     assert len(modes) == len(action)
 
@@ -53,7 +57,7 @@ def check_planner(encoder, predictor, zond, test):
     danger = torch.from_numpy(danger[starts]).to(device)
     starts = torch.from_numpy(starts).to(device)
 
-    best = brain_choice(encoder, predictor, zond, lidar_now, action, speed, starts)
+    best = brain_choice(encoder, predictor, zond, obs, action, speed, starts)
     real = action[starts, 1]                                         
     dice = torch.Generator(device=device).manual_seed(0)            
     control = best[torch.randperm(len(best), generator=dice, device=device)]
@@ -69,6 +73,8 @@ def check_planner(encoder, predictor, zond, test):
 
 
 if __name__ == "__main__":
-    test = load_pairs("test")
-    encoder, predictor, zond = load_run(sys.argv[1] if len(sys.argv) > 1 else CURRENT_RUN, DEVICE)
-    print(check_planner(encoder, predictor, zond, test))
+    run = sys.argv[1] if len(sys.argv) > 1 else CURRENT_RUN
+    _, action, speed, _ = load_pairs("test")
+    obs = pair_obs("test", run_input(run))
+    encoder, predictor, zond = load_run(run, DEVICE)
+    print(check_planner(encoder, predictor, zond, obs, action, speed))

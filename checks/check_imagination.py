@@ -1,7 +1,7 @@
 import sys
 import torch
 import random
-from core.data import load_pairs, safe_starts, load_photos
+from core.data import load_pairs, safe_starts, pair_obs
 from core.imagine import imagine_step
 from core.models import load_run, run_input
 from config import DEVICE, CURRENT_RUN
@@ -50,14 +50,9 @@ def check_imagination(encoder, predictor, obs, action, speed , safe):
 if __name__ == "__main__":
     run = sys.argv[1] if len(sys.argv) > 1 else CURRENT_RUN
     encoder, predictor, _ = load_run(run, DEVICE, with_zond=False)
-    if run_input(run) == "photo":
-        images, action, speed, trip, _ = load_photos("test")
-        obs = images[:, None].float() / 255
-        safe = torch.nonzero(trip[:-STEPS] == trip[STEPS:]).flatten()
-    else:
-        lidar_now, action, speed, lidar_next = load_pairs("test")
-        obs = lidar_now.float()
-        safe = safe_starts(lidar_now, lidar_next, STEPS)
+    lidar_now, action, speed, lidar_next = load_pairs("test")
+    obs = pair_obs("test", run_input(run))                  # lidar or photos, one row per test pair
+    safe = safe_starts(lidar_now, lidar_next, STEPS)        # the same trips for both: the lidar pairs know them
     print(check_imagination(encoder, predictor, obs, action, speed, safe))
 
 

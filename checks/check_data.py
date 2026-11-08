@@ -1,10 +1,12 @@
 # Check every episode file before the big (night) collection.
-# Run from the BC folder:  venv\Scripts\python -m checks.check_data
+# Run from the BC folder:  venv\Scripts\python -m checks.check_data                 (the training data, DATA_DIR)
+#                    or:   venv\Scripts\python -m checks.check_data data/fast_practice   (any folder of trips)
 
 import glob
 import os
+import sys
 import numpy as np
-from config import (DATA_DIR, THROTTLE_MIN, THROTTLE_MAX, EPISODE_TIME, BRAKE_TIME,
+from config import (DATA_DIR, THROTTLE_MIN, THROTTLE_TOP as THROTTLE_MAX, EPISODE_TIME, BRAKE_TIME,
                     WAIT_MIN, WAIT_MAX, RECORD_STEP, LIDAR_BEAMS)     # the same numbers collection_random.py uses
 
 MODES = ("random", "gap", "safety")   # who steered (policy.py)
@@ -13,7 +15,7 @@ MAX_STEER_RAD = 0.5236  # full steering (30 degrees) in radians
 LAG_GAP = 0.1           # time gap between two rows bigger than this = the game was slow for a moment (s)
 MAX_GAP = 0.2           # bigger than this = the game froze -> problem (s)
 MAX_JUMP = 0.5         # biggest allowed position jump between two rows (m)
-MAX_SPEED = 5           # m/s, our car never drives faster
+MAX_SPEED = 7           # m/s, our car never drives faster (fast data: throttle 0.2 ~ 4.9 m/s)
 SHORT_ROWS = 20         # episodes shorter than this (1 s) are "very short"
 
 ROW_KEYS = ["lidar", "throttle", "steering", "speed", "time", "collisions", "image",
@@ -189,9 +191,10 @@ def print_summary(files, infos, bad_files):
 
 
 def main():
-    files = sorted(glob.glob(f"{DATA_DIR}/drive_*.npz"))
+    folder = sys.argv[1] if len(sys.argv) > 1 else DATA_DIR
+    files = sorted(glob.glob(f"{folder}/drive_*.npz"))
     if not files:
-        print(f"No files in {DATA_DIR}")
+        print(f"No files in {folder}")
         return
 
     infos = []

@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import random
-from config import THROTTLE_MIN, THROTTLE_MAX
+from config import THROTTLE_MIN, THROTTLE_TOP
 
 # working range from 180 to 900
 # 900 - left , 180 - rinht
@@ -12,7 +12,12 @@ random_steering = 0
 
 # --- variety for the camera dataset ---
 THROTTLE_HOLD = (1, 3)          # s, one throttle value is kept this long
-COAST_SHARE = 0              # sometimes throttle 0 -> the car slows down
+# --- fast data (2026-11-08): throttle up to THROTTLE_TOP, short brake pulses, safety that looks farther when fast
+BRAKE_SHARE = 0.1               # share of throttle picks that are a brake pulse (throttle 0)
+BRAKE_PULSE = (0.1, 0.4)        # s: throttle 0 brakes hard (1.4 m/s -> 0 in 0.3 s), so only short pulses
+DECEL = 4.0                     # m/s2, measured braking of throttle 0 (4.3 in the first 0.15 s)
+WARMUP_THROTTLE = 0.07          # warm-up drives to a random place on the track: not too fast
+SAFETY_BRAKE_SPEED = 2.0        # m/s: faster than this, safety brakes (throttle 0) instead of only slowing down
 MODE_HOLD = (2, 5)              # s, one driving mode is kept this long
 RANDOM_SHARE = 0.6              # how often the "random" mode is chosen (else "gap")
 RANDOM_HOLD = (0.2, 1.2)        # s, one random steering value is kept this long
@@ -117,12 +122,14 @@ def find_gap(ranges):   # ranges has type list
 
 def pick_throttle(time):
     global throttle_now, next_throttle
+    # independent of the situation (like the random steering): the model must learn what the throttle DOES
     if time >= next_throttle:
-        if random.random() < COAST_SHARE:
+        if random.random() < BRAKE_SHARE:
             throttle_now = 0
+            next_throttle = time + random.uniform(*BRAKE_PULSE)
         else:
-            throttle_now = random.uniform(THROTTLE_MIN, THROTTLE_MAX)
-        next_throttle = time + random.uniform(*THROTTLE_HOLD)
+            throttle_now = random.uniform(THROTTLE_MIN, THROTTLE_TOP)
+            next_throttle = time + random.uniform(*THROTTLE_HOLD)
     return throttle_now
 
 
@@ -143,14 +150,15 @@ def random_steering_at(time):
     return random_now
 
 
-def wall_is_close(ranges):
+def wall_is_close(ranges, speed=0.0):
+    # the faster the car, the farther ahead it must look: + braking distance speed^2 / (2 DECEL)
     front = min(ranges[460:621])                 # ±20°  (index = (angle + 135) * 4)
     around = min(ranges[180:901])                # ±90°
-    return front < SAFE_FRONT or around < SAFE_AROUND
+    return front < SAFE_FRONT + speed ** 2 / (2 * DECEL) or around < SAFE_AROUND + 0.05 * speed
 
 
-def decide(ranges, time, warming_up):
-    """Return (throttle, steering, mode) for this moment."""
+def decide(ranges, time, warming_up, speed=0.0):
+    """Return (throttle, steering, mode) for this moment. speed: m/s now (for the safety distance)."""
     global last_time, safety_until
     if time < last_time:                         # the clock went back to 0 = a new trip
         reset_policy()
@@ -158,12 +166,13 @@ def decide(ranges, time, warming_up):
 
     throttle = pick_throttle(time)
     if warming_up:                               # drive normally to a random place on the track
-        return throttle, add_steering_noise(find_gap(ranges), time), "warmup"
+        return min(throttle, WARMUP_THROTTLE), add_steering_noise(find_gap(ranges), time), "warmup"
 
-    if wall_is_close(ranges):
+    if wall_is_close(ranges, speed):
         safety_until = time + SAFETY_TIME
     if time < safety_until:
-        return min(throttle, SAFETY_THROTTLE), find_gap(ranges), "safety"
+        save_throttle = 0 if speed > SAFETY_BRAKE_SPEED else min(throttle, SAFETY_THROTTLE)
+        return save_throttle, find_gap(ranges), "safety"
 
     if pick_mode(time) == "random":
         return throttle, random_steering_at(time), "random"

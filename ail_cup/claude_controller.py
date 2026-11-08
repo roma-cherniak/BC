@@ -35,7 +35,9 @@ SMOOTH = 0.01                   # penalty per unit of steering change -> less zi
 SAFE_FRONT = 1.0                # m, slow down if something is closer in front (other cars)
 BUDGET = 0.1                    # s of thinking per call: 0.2 broke the 250 ms cap on the slower Garage CPU (run #1097)
 PRINT_EVERY = 5                 # calls between two status lines (0.25 s)
-RESCUE_M = 0.25                 # m: if the best imagined path comes closer than this to a wall, use the simple rule
+GAP_HALF = 10                   # degrees: half width of an opening the rescue rule steers into (~ the car's width at 1 m)
+SIDE_MIN = 0.5                  # m: a side wall closer than this pushes the rescue steering away from it
+RESCUE_M = 0.25               # m: if the best imagined path comes closer than this to a wall, use the simple rule
 
 if hasattr(math, "sumprod"):    # Python 3.12+: a fast dot product written in C
     dot = math.sumprod
@@ -73,7 +75,7 @@ def pick(box, key, default):
 
 class Controller:
     def __init__(self, init):
-        print("claude_controller v8")                                        # which file really runs in the Garage
+        print("claude_controller v10")                                        # which file really runs in the Garage
         print("INIT type:", type(init), "keys:", list(init) if isinstance(init, dict) else "-")   # no dunders: the Garage forbids them
         car = pick(init, "car", {})
         lidar = pick(init, "lidar", None)
@@ -174,10 +176,26 @@ class Controller:
         return worst
 
     def simple_rule(self, scan):
-        # no network: steer to the side with more space
-        third = len(scan) // 3
-        right, left = sum(scan[:third]) / third, sum(scan[-third:]) / third
-        return max(-1.0, min(1.0, (left - right) * 0.5))
+        # no network / rescue: steer into the deepest opening ahead (-90..+90 degrees). An opening counts only as deep
+        # as its closest beam within +-GAP_HALF degrees, so a single far beam between two walls does not attract.
+        # (The old rule "average of the right vs left third" looked behind the car too and steered left into a
+        # right turn, run #1100.)
+        n = len(scan)
+        best_angle, best_depth = 0.0, -1.0
+        for angle in range(-90, 91, 5):
+            depth = min(scan[self.beam_at(a, n)] for a in range(angle - GAP_HALF, angle + GAP_HALF + 1, 2))
+            if depth > best_depth + 0.05 or (abs(depth - best_depth) <= 0.05 and abs(angle) < abs(best_angle)):
+                best_angle, best_depth = angle, depth                       # ties: the straighter opening
+        steer = best_angle / 30                                              # steering 1 = 30 degrees
+        # ...and push away from a side wall that is too close: the deepest opening alone drove along the left wall
+        # at 0.2 m and even steered into it (run #1102)
+        left = min(scan[self.beam_at(a, n)] for a in range(60, 121, 5))
+        right = min(scan[self.beam_at(a, n)] for a in range(-120, -59, 5))
+        if left < SIDE_MIN:
+            steer -= (SIDE_MIN - left) / SIDE_MIN * 1.5
+        if right < SIDE_MIN:
+            steer += (SIDE_MIN - right) / SIDE_MIN * 1.5
+        return max(-1.0, min(1.0, steer))
 
     def step(self, obs):
         began = time.perf_counter()

@@ -22,6 +22,15 @@ def load_photos(name, device=DEVICE):
     return images, action, speed, trip, lidar
 
 
+def pair_obs(name, kind, device=DEVICE):
+    # what the encoder eats for every pair of data/{name}_pairs.npz, in the same order: lidar_now or that moment's photo
+    if kind == "photo":
+        images, _, _, trip, _ = load_photos(name, device)
+        has_next = trip[:-1] == trip[1:]                       # a frame with a next frame in its trip = one pair
+        return images[:-1][has_next][:, None].float() / 255
+    return load_pairs(name, device)[0].float()
+
+
 def safe_starts(lidar_now, lidar_next, steps):
     same = (lidar_next[:-1] == lidar_now[1:]).all(dim=1).cpu()      # on the CPU the loop below is much faster
     safe = [i for i in range(len(same) - steps) if same[i : i + steps].all()]

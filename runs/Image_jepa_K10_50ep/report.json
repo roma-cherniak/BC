@@ -1,0 +1,11 @@
+{
+  "run": "Image_jepa_K10_50ep",
+  "input": "photo",
+  "date": "2026-11-03T00:32",
+  "1 s, quess loss / copy loss": 0.13082719661309816,
+  "planner_agree_vs_control": -4.3631792068481445,
+  "training epochs": 50,
+  "training val/copy": 0.30158937241142575,
+  "training spread": 0.9916693568229675,
+  "training sigreg": 1.5128121594535617
+}

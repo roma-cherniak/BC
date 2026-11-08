@@ -4,9 +4,9 @@
 import sys
 import numpy as np
 import torch
-from core.models import LATENT, LIDAR, load_run
+from core.models import LATENT, LIDAR, load_run, run_input
 from core.sigreg import sigreg
-from core.data import load_pairs
+from core.data import load_pairs, pair_obs
 from config import FACTS, LIDAR_BEAMS, MAX_RANGE, DEVICE, CURRENT_RUN
 from core.sensors import clean_lidar
 
@@ -15,22 +15,24 @@ ROWS = 8                # how many test moments go through the models
 CLOUD = 256             # points in the sigreg test clouds (the same as in sigreg.py)
 
 
-def check_shapes(encoder, predictor, zond, test):
-    lidar_now, action, speed, _ = test
+# every small check gets the same things; obs = what the encoder eats (lidar or photos, see core.data.pair_obs)
+
+def check_shapes(encoder, predictor, zond, test, obs):
+    _, action, speed, _ = test
     with torch.no_grad():
-        z = encoder(lidar_now[:ROWS].float())
+        z = encoder(obs[:ROWS])
         z_next = predictor(z, action[:ROWS], speed[:ROWS])
     assert z.shape == (ROWS, LATENT), f"encoder gives {tuple(z.shape)}, need {(ROWS, LATENT)}"
     assert z_next.shape == (ROWS, LATENT), f"predictor gives {tuple(z_next.shape)}, need {(ROWS, LATENT)}"
 
 
-def check_probe(encoder, predictor, zond, test):
+def check_probe(encoder, predictor, zond, test, obs):
     with torch.no_grad():
-        facts = zond(encoder(test[0][:ROWS].float()))
+        facts = zond(encoder(obs[:ROWS]))
     assert facts.shape == (ROWS, len(FACTS)), f"probe gives {facts.shape[1]} numbers, FACTS has {len(FACTS)}"
 
 
-def check_sigreg(encoder, predictor, zond, test):
+def check_sigreg(encoder, predictor, zond, test, obs):
     device = test[0].device
     gpus = [device] if device.type == "cuda" else []
     with torch.random.fork_rng(devices=gpus):        # sigreg uses torch.randn: the global dice stay as they were
@@ -41,12 +43,12 @@ def check_sigreg(encoder, predictor, zond, test):
     assert bad > 50, f"sigreg on a collapsed cloud = {bad:.2f}, should be big (about 100)"
 
 
-def check_no_nan(encoder, predictor, zond, test):
-    for name, x in zip(["lidar_now", "action", "speed", "lidar_next"], test):
+def check_no_nan(encoder, predictor, zond, test, obs):
+    for name, x in zip(["lidar_now", "action", "speed", "lidar_next", "obs"], [*test, obs]):
         assert torch.isfinite(x).all(), f"{name} has NaN or inf"
 
 
-def check_clean_lidar(encoder, predictor, zond, test):
+def check_clean_lidar(encoder, predictor, zond, test, obs):
     scan = np.linspace(0, 2 * MAX_RANGE, LIDAR_BEAMS)      # 0 .. 20 m: some walls are farther than MAX_RANGE
     scan[4] = np.inf                                        # the game sends inf when a beam hits nothing
     one = clean_lidar(scan)                                 # one scan, like the driver
@@ -59,11 +61,11 @@ def check_clean_lidar(encoder, predictor, zond, test):
 SMALL_CHECKS = [check_shapes, check_probe, check_sigreg, check_no_nan, check_clean_lidar]
 
 
-def check_code(encoder, predictor, zond, test):
+def check_code(encoder, predictor, zond, test, obs):
     ok = True
     for small_check in SMALL_CHECKS:
         try:
-            small_check(encoder, predictor, zond, test)
+            small_check(encoder, predictor, zond, test, obs)
             print(f"OK    {small_check.__name__}")
         except AssertionError as error:
             print(f"FAIL  {small_check.__name__}: {error}")
@@ -72,6 +74,8 @@ def check_code(encoder, predictor, zond, test):
 
 
 if __name__ == "__main__":
+    run = sys.argv[1] if len(sys.argv) > 1 else CURRENT_RUN
     test = load_pairs("test")
-    encoder, predictor, zond = load_run(sys.argv[1] if len(sys.argv) > 1 else CURRENT_RUN, DEVICE)
-    print(check_code(encoder, predictor, zond, test))
+    obs = pair_obs("test", run_input(run))
+    encoder, predictor, zond = load_run(run, DEVICE)
+    print(check_code(encoder, predictor, zond, test, obs))

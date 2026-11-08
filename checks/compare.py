@@ -18,7 +18,7 @@ if not reports:
 checks = []                     # every number any report has, in the order it first appears
 for report in reports.values():
     for name in report:
-        if name not in ("run", "date") and name not in checks:
+        if name not in ("run", "input", "date") and name not in checks:
             checks.append(name)
 
 width = max(len(name) for name in checks)

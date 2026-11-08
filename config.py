@@ -15,6 +15,8 @@ WAIT_MIN = 60                   # messages to wait after a reset (random between
 WAIT_MAX = 1200
 THROTTLE_MIN = 0.03             # random throttle while driving
 THROTTLE_MAX = 0.09             # ... and the scale for the model: throttle / THROTTLE_MAX
+THROTTLE_TOP = 0.20             # fast collection (data/fast_<track>): random throttle up to this (~4.9 m/s);
+                                # the model scale stays THROTTLE_MAX, so fast throttle gives inputs up to 2.2
 
 # --- what the model sees: prepare_data.py and the driver must clean the lidar the same way
 LIDAR_BEAMS = 1081              # beams in one raw scan from the game

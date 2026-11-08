@@ -17,15 +17,16 @@ def score(facts):
     return walls.min(dim=1).values
 
 
-def score_options(encoder, predictor, zond, lidar, throttle, speed):
-    # lidar (M, 271), throttle (M,), speed (M, 1), already scaled for the model -> scores (M, 9)
-    M, K = len(lidar), len(STEERING)
-    options = torch.tensor(STEERING, device=lidar.device)
+def score_options(encoder, predictor, zond, obs, throttle, speed):
+    # obs = what the encoder eats for M moments (lidar (M, 271) or photos (M, 1, 36, 64)),
+    # throttle (M,), speed (M, 1), already scaled for the model -> scores (M, 9)
+    M, K = len(obs), len(STEERING)
+    options = torch.tensor(STEERING, device=obs.device)
     with torch.no_grad():
-        z = encoder(lidar.float()).repeat_interleave(K, dim=0)                 # (M*9, 32): m0 x9, m1 x9, ...
+        z = encoder(obs.float()).repeat_interleave(K, dim=0)                   # (M*9, 32): m0 x9, m1 x9, ...
         act = torch.stack([throttle.repeat_interleave(K), options.repeat(M)], dim=1)
         spd = speed.repeat_interleave(K, dim=0)
-        worst = torch.full((M * K,), float("inf"), device=lidar.device)       # the closest wall on the WHOLE path
+        worst = torch.full((M * K,), float("inf"), device=obs.device)         # the closest wall on the WHOLE path
         for _ in range(STEPS):
             z = imagine_step(predictor, z, act, spd, GUARD)
             worst = torch.minimum(worst, score(zond(z).clamp(0, 1)))

@@ -1,11 +1,4 @@
-# JEPA driver. Every message from the game: the encoder describes the lidar, the predictor imagines 0.5 s ahead
-# for 9 steering options, the probe reads the walls on the WHOLE imagined path, and the option whose closest wall
-# stays farthest away is sent to the game.
-# The settings (score, STEPS, no norm guard) won an offline test on the "random" test moments
-# (the natural experiment, now checks/check_planner.py): moments where the coin steered like this planner
-# were in danger 35.2 % of the time vs 50.1 % for the same choices shuffled between moments
-# (your old sum front + right + left at 20 steps: 45.6 % vs 49.6 %).
-#
+
 # Run from the BC folder, then click "Disconnected" in the game menu:
 #     venv\Scripts\python -m driver_lidar.drive_jepa
 
@@ -26,7 +19,7 @@ from core.planner import STEERING, score_options
 MODEL = "k10_50ep"          # which model drives: runs/<MODEL>/
 TRACK = "practice"          # which sim build is open: the log goes to runs/<MODEL>/drive_<TRACK>.csv
 DEVICE = "cpu"              # the game needs the graphics card; 9 options x 10 steps take a few ms on the CPU
-THROTTLE = 0.08             # constant; the training data had 0.03 .. 0.09
+THROTTLE = 0.05             # constant; the training data had 0.03 .. 0.09
 SMOOTH = 0.01               # penalty per unit of steering change (0.01 = 10 cm of wall distance) -> less zig-zag
 RESET_PAUSE = 30            # messages to ignore the collision counter after a reset (the game needs a moment)
 PRINT_EVERY = 60            # ~1 s

@@ -1,0 +1,18 @@
+{
+  "MODEL": "wm2",
+  "INPUT": "lidar",
+  "BEAMS": 109,
+  "LATENT": 64,
+  "HISTORY": 4,
+  "K": 10,
+  "WIDTH": 128,
+  "LAYERS": 4,
+  "EPOCHS": 2,
+  "BATCH": 256,
+  "LR": 0.0003,
+  "SIGREG_WEIGHT": 0.1,
+  "SPEED_WEIGHT": 1.0,
+  "MIRROR": 0.5,
+  "DATA_DIR": "data/wm2 (from data/random_practice, split data/train.txt, val.txt, test.txt)",
+  "date": "2026-11-08T01:45"
+}

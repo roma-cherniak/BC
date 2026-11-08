@@ -5,7 +5,15 @@ from data_collection.packet import read_packet
 import random 
 from data_collection.policy import decide, reset_policy
 from data_collection.recorder import rows, add_row, save, new_episod
-from config import DATA_DIR, WAIT_MIN, WAIT_MAX, EPISODE_TIME, BRAKE_TIME, RECORD_STEP
+import glob
+import os
+import sys
+from config import WAIT_MIN, WAIT_MAX, EPISODE_TIME, BRAKE_TIME, RECORD_STEP
+
+# Run from the BC folder, with the sim of that track open:
+#     venv\Scripts\python -m data_collection.collection_random practice      (or: compete)
+# Trips go to data/fast_<track>/ (the old data/random_practice stays as it is). A restart continues the numbering
+# after the last file, so nothing is ever overwritten.
 
 sio = socketio.Server()
 
@@ -18,7 +26,11 @@ lap_timer = 0
 next_write = 0.0
 
 
-TRACK = "practice"
+TRACK = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in ("practice", "compete") else "practice"
+OUT_DIR = f"data/fast_{TRACK}"
+os.makedirs(OUT_DIR, exist_ok=True)
+_old = sorted(glob.glob(f"{OUT_DIR}/drive_*.npz"))
+episod = int(os.path.basename(_old[-1])[6:10]) if _old else 0      # continue after the last saved trip
 warmup = 0
 
 
@@ -43,7 +55,7 @@ def start_new_episod(wait, reason):
         global global_timer, next_write, waiting, episod, warmup
 
         if len(rows) > 0:
-            save(f"{DATA_DIR}/drive_{episod:04d}.npz", TRACK, reason, warmup)
+            save(f"{OUT_DIR}/drive_{episod:04d}.npz", TRACK, reason, warmup)
 
         new_episod()
         reset_policy()
@@ -76,7 +88,7 @@ def bridge(sid, data):
         reset = start_new_episod(random.randint(WAIT_MIN,WAIT_MAX), "timeout")
 
 
-    throttle, steering, mode = decide(obs["lidar"], global_timer, waiting > 0)
+    throttle, steering, mode = decide(obs["lidar"], global_timer, waiting > 0, obs["speed"])
     if global_timer > BRAKE_TIME and waiting == 0:
         throttle = 0
 
@@ -109,5 +121,6 @@ def bridge(sid, data):
     sio.emit('Bridge', data={'V1 Throttle': str(throttle) , 'V1 Steering': str(steering) , 'Reset': str(reset)})
 
 
-print('Door is open, waiting for the game...')
-eventlet.wsgi.server(eventlet.listen(('127.0.0.1', 4567)), socketio.WSGIApp(sio))
+if __name__ == "__main__":                       # importing this file (tests) must not start the server
+    print(f'Door is open, waiting for the game... track {TRACK}, trips -> {OUT_DIR}, next trip {episod + 1}')
+    eventlet.wsgi.server(eventlet.listen(('127.0.0.1', 4567)), socketio.WSGIApp(sio))
