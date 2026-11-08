@@ -2,7 +2,7 @@
 # in "random" test moments a coin steered. If the planner's steering is good, the moments where the coin happened to
 # steer like the planner (|coin - plan| < 0.5) must be followed by danger (safety or crash within 0.5 s) less often
 # than the same plans shuffled between moments (control). Old lidar models: b109 -12.9, find_gap about -23 points.
-# Run from the BC folder:  venv\Scripts\python -m wm2.plan_test wm2_k10
+# Run from the BC folder:  venv\Scripts\python -m wm2.plan_test wm2_k10 [moments [samples iters horizon elites]]
 
 import sys
 import time
@@ -25,6 +25,9 @@ def main(run):
     global MOMENTS
     if len(sys.argv) > 2:
         MOMENTS = int(sys.argv[2])
+    # optional planner size: samples iters horizon elites (default: wm2/cem.py)
+    size = [int(a) for a in sys.argv[3:7]] if len(sys.argv) > 6 else [cem.SAMPLES, cem.ITERS, cem.HORIZON, cem.ELITES]
+    print(f"planner: samples {size[0]}, iters {size[1]}, horizon {size[2]}, elites {size[3]}")
     torch.manual_seed(0)
     encoder, predictor = Encoder().to(DEVICE), Predictor().to(DEVICE)
     encoder.load_state_dict(torch.load(f"{RUNS_DIR}/{run}/encoder.pt", map_location=DEVICE))
@@ -50,7 +53,7 @@ def main(run):
             s = starts[i : i + CHUNK]
             lidar, state, action = windows(test, s, HISTORY)
             z = encoder(lidar.flatten(0, 1), state.flatten(0, 1)).view(len(s), HISTORY, LATENT)
-            best, _ = cem.plan(predictor, heads, z, action[:, : HISTORY - 1])
+            best, _ = cem.plan(predictor, heads, z, action[:, : HISTORY - 1], None, *size)
             choices.append(best[:, 0, 1])
             throttles.append(best[:, 0, 0] * THROTTLE_MAX)
             if (i // CHUNK) % 5 == 0:

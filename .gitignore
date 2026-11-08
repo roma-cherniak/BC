@@ -6,3 +6,7 @@ __pycache__/
 *.npz
 *.pt
 
+
+# night plan logs (night/supervisor.py)
+night/*.log
+night/state.txt
