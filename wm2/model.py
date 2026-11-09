@@ -57,8 +57,9 @@ class Block(nn.Module):
         nn.init.zeros_(self.ada.weight)                             # AdaLN-zero: every block starts as "do nothing"
         nn.init.zeros_(self.ada.bias)
 
-    def forward(self, x, cond, mask):
-        shift1, scale1, gate1, shift2, scale2, gate2 = self.ada(cond).chunk(6, dim=-1)
+    def forward(self, x, code, mask):
+        # code = self.ada(action features) (B, T, 6 x WIDTH): the caller computes it (once per action, see codes())
+        shift1, scale1, gate1, shift2, scale2, gate2 = code.chunk(6, dim=-1)
         h = self.norm1(x) * (1 + scale1) + shift1
         x = x + gate1 * self.attn(h, h, h, attn_mask=mask, need_weights=False)[0]
         h = self.norm2(x) * (1 + scale2) + shift2
@@ -80,33 +81,90 @@ class Predictor(nn.Module):
         mask = torch.triu(torch.full((HISTORY, HISTORY), -math.inf), diagonal=1)
         self.register_buffer("mask", mask)                          # moment i sees only moments <= i
 
-    def forward(self, z, action):
+    def codes(self, action, distinct=True):
+        # action (B, T, 2) -> (B, T, LAYERS, 6 x WIDTH): what every action tells every layer (AdaLN). It depends on
+        # the action only, not on its place in the window, so a rollout computes it once per distinct action
+        # (the grid planner's 72 plans use only a few dozen) instead of once per step and window slot.
+        # distinct=False skips torch.unique (it waits for the GPU, which a CUDA graph does not allow).
+        flat = action.reshape(-1, ACTION)
+        if distinct:
+            flat, index = torch.unique(flat, dim=0, return_inverse=True)
+        cond = self.act(flat)
+        per_layer = torch.stack([block.ada(cond) for block in self.blocks], dim=1)
+        if distinct:
+            per_layer = per_layer[index]
+        return per_layer.view(*action.shape[:-1], LAYERS, -1)
+
+    def forward(self, z, action, codes=None):
         # z (B, T, LATENT), action (B, T, 2), T <= HISTORY  ->  next z after every moment (B, T, LATENT)
-        # and the next speed / SPEED_MAX (B, T)
+        # and the next speed / SPEED_MAX (B, T). codes: self.codes(action) if already computed (rollout)
         T = z.shape[1]
         x = self.inp(z) + self.pos[:T]
-        cond = self.act(action)
-        for block in self.blocks:
-            x = block(x, cond, self.mask[:T, :T])
+        if codes is None:
+            codes = self.codes(action)
+        for i, block in enumerate(self.blocks):
+            x = block(x, codes[:, :, i], self.mask[:T, :T])
         x = self.norm(x)
         return z + self.dz(x), self.speed(x)[..., 0]
 
 
-def rollout(predictor, z_history, actions):
+def rollout(predictor, z_history, actions, same=0, distinct=True):
     # imagine len(actions) steps ahead: z_history (B, HISTORY, LATENT) real past, actions (B, HISTORY - 1 + S, 2) =
     # the actions of the past moments and then the S actions to imagine. -> imagined z (B, S, LATENT), speed (B, S)
-    window_z = z_history
-    window_a = actions[:, :HISTORY]
+    # same: the first `same` imagined steps are identical for the whole batch (the planner: one z history and a
+    # prefix every plan shares) -> they are computed for row 0 only and copied. 0 = every row on its own.
+    codes = predictor.codes(actions, distinct)                      # once for the whole rollout
+    B, steps = len(actions), actions.shape[1] - HISTORY + 1
+    same = min(same, steps)
+    rows = 1 if same > 0 else B
+    window_z = z_history[:rows]
     zs, speeds = [], []
-    steps = actions.shape[1] - HISTORY + 1
     for s in range(steps):
-        z_next, speed_next = predictor(window_z, window_a)
+        if s == same and rows < B:                                  # the plans part here: one row -> every row
+            rows = B
+            window_z = window_z.expand(B, -1, -1)
+            zs, speeds = [z.expand(B, -1) for z in zs], [v.expand(B) for v in speeds]
+        z_next, speed_next = predictor(window_z, actions[:rows, s : s + HISTORY], codes[:rows, s : s + HISTORY])
         zs.append(z_next[:, -1])
         speeds.append(speed_next[:, -1])
         if s + 1 < steps:                                           # slide the window: drop the oldest moment
             window_z = torch.cat([window_z[:, 1:], z_next[:, -1:]], dim=1)
-            window_a = actions[:, s + 1 : s + 1 + HISTORY]
+    if rows < B:                                                    # every step was shared
+        zs, speeds = [z.expand(B, -1) for z in zs], [v.expand(B) for v in speeds]
     return torch.stack(zs, dim=1), torch.stack(speeds, dim=1)
+
+
+class GraphRollout:
+    # rollout() on the graphics card as ONE CUDA graph per batch shape (the sim driver, wm2/drive.py). On Windows
+    # starting one GPU operation costs ~50 us, and a 20-step rollout of the 4-layer predictor has ~2000 tiny ones:
+    # 119 ms as normal GPU code, 253 ms on the CPU, ~54 ms as a graph (2026-11-09, with the sim running).
+    # A graph replays fixed operations on fixed tensors: new inputs are copied into them, so `same` is not used.
+    def __init__(self, predictor):
+        self.predictor, self.graphs = predictor, {}
+
+    def __call__(self, z_history, actions, same=0):
+        key = (tuple(z_history.shape), tuple(actions.shape))
+        if key not in self.graphs:
+            self.graphs[key] = self.capture(z_history, actions)
+        graph, z_in, a_in, z_out, v_out = self.graphs[key]
+        z_in.copy_(z_history)
+        a_in.copy_(actions)
+        graph.replay()
+        return z_out.clone(), v_out.clone()
+
+    @torch.no_grad()
+    def capture(self, z_history, actions):
+        z_in, a_in = z_history.clone(), actions.clone()
+        side = torch.cuda.Stream()
+        side.wait_stream(torch.cuda.current_stream())
+        with torch.cuda.stream(side):                               # warm-up runs, as torch.cuda.graph asks
+            for _ in range(3):
+                rollout(self.predictor, z_in, a_in, 0, distinct=False)
+        torch.cuda.current_stream().wait_stream(side)
+        graph = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(graph):
+            z_out, v_out = rollout(self.predictor, z_in, a_in, 0, distinct=False)
+        return graph, z_in, a_in, z_out, v_out
 
 
 def count(module):

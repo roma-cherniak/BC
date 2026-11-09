@@ -32,9 +32,15 @@ STD_START = (0.3, 0.6)  # (throttle in model units, steering)
 STD_MIN = 0.05
 
 
-def sequence_cost(predictor, heads, z_hist, past_actions, plans):
+def sequence_cost(predictor, heads, z_hist, past_actions, plans, same=0, roll=None):
     # z_hist (B, HISTORY, D), past_actions (B, HISTORY - 1, 2), plans (B, HORIZON, 2) in model units -> cost (B,)
-    z_im, speed_im = rollout(predictor, z_hist, torch.cat([past_actions, plans], dim=1))
+    # same = d when every row has the same z_hist, past_actions and first d plan steps (see model.rollout)
+    # roll: another rollout with the same answer, e.g. model.GraphRollout(predictor) on the graphics card
+    actions = torch.cat([past_actions, plans], dim=1)
+    if roll is None:
+        z_im, speed_im = rollout(predictor, z_hist, actions, same)
+    else:
+        z_im, speed_im = roll(z_hist, actions, same)
     walls, danger, progress = heads(z_im)
     v = (speed_im * SPEED_MAX).clamp(min=0)
     if walls.shape[-1] == 13:                       # sector heads: -90 .. +90 degrees in 15 degree sectors
