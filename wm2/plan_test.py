@@ -3,7 +3,9 @@
 # steer like the planner (|coin - plan| < 0.5) must be followed by danger (safety or crash within 0.5 s) less often
 # than the same plans shuffled between moments (control). Old lidar models: b109 -12.9, find_gap about -23 points.
 # Run from the BC folder:  venv\Scripts\python -m wm2.plan_test wm2_k10 [moments [samples iters horizon elites]]
+# Other test data (fair comparison of two models):  set WM2_TEST_DATA=data/wm2_fast  before the command
 
+import os
 import sys
 import time
 
@@ -11,7 +13,7 @@ import torch
 
 from config import DEVICE, RUNS_DIR, THROTTLE_MAX
 from wm2 import cem
-from wm2.data import load_split, window_starts, windows
+from wm2.data import load_split, run_data_dir, window_starts, windows
 from wm2.heads import load_heads
 from wm2.model import HISTORY, LATENT, Encoder, Predictor
 
@@ -35,7 +37,9 @@ def main(run):
     encoder.eval(), predictor.eval()
     heads = load_heads(run, DEVICE)
 
-    test = load_split("test", DEVICE)
+    data_dir = os.environ.get("WM2_TEST_DATA", run_data_dir(run))   # e.g. test an old model on data/wm2_fast
+    print(f"test data: {data_dir}")
+    test = load_split("test", DEVICE, data_dir)
     starts = window_starts(test["trip"], HISTORY)                            # moments with a full history
     now = (starts + HISTORY - 1).numpy()
     keep = (test["mode"][now] == "random") & (test["time"][now] < BRAKE_TIME)

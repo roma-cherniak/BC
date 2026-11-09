@@ -1,0 +1,19 @@
+{
+  "MODEL": "wm2",
+  "INPUT": "lidar",
+  "BEAMS": 109,
+  "LATENT": 64,
+  "HISTORY": 4,
+  "K": 10,
+  "WIDTH": 128,
+  "LAYERS": 4,
+  "EPOCHS": 20,
+  "BATCH": 256,
+  "LR": 0.0003,
+  "SIGREG_WEIGHT": 0.1,
+  "SPEED_WEIGHT": 1.0,
+  "MIRROR": 0.5,
+  "WM2_DATA": "data/wm2_fast",
+  "DATA_DIR": "see wm2/prepare.py SETS",
+  "date": "2026-11-08T19:17"
+}

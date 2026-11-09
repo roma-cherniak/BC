@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn
 
 from config import DEVICE, FRONT, FRONT_LEFT, FRONT_RIGHT, LEFT, MAX_RANGE, RIGHT, RUNS_DIR, beams_between
-from wm2.data import load_split
+from wm2.data import load_split, run_data_dir
 from wm2.model import LATENT, Encoder
 
 # two kinds of heads:
@@ -73,7 +73,8 @@ def main(run):
     encoder = Encoder().to(DEVICE)
     encoder.load_state_dict(torch.load(f"{RUNS_DIR}/{run}/encoder.pt", map_location=DEVICE))
     encoder.eval()
-    train, test = load_split("train", DEVICE), load_split("test", DEVICE)
+    data_dir = run_data_dir(run)
+    train, test = load_split("train", DEVICE, data_dir), load_split("test", DEVICE, data_dir)
     z, z_t = encode_all(encoder, train), encode_all(encoder, test)
     (w, d, p), (w_t, d_t, p_t) = targets(train), targets(test)
 

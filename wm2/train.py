@@ -7,7 +7,8 @@
 #   + SPEED_WEIGHT x error of the imagined speed + SIGREG_WEIGHT x SIGReg (per moment of the window, like LeWM).
 #
 # Run from the BC folder (no sim at the same time: 4 GB graphics card):  venv\Scripts\python -m wm2.train
-# A short try under another name:  venv\Scripts\python -m wm2.train wm2_try 2      (arguments: RUN, EPOCHS)
+# A short try under another name:  venv\Scripts\python -m wm2.train wm2_try 2      (arguments: RUN, EPOCHS, DATA)
+# Fine-tune a trained model on more data:  ... -m wm2.train wm2_self1 6 data/wm2_self wm2_fast_k10 1e-4   (+ INIT, LR)
 
 import csv
 import datetime
@@ -33,6 +34,8 @@ SIGREG_WEIGHT = 0.1     # LeWM's lambda
 SPEED_WEIGHT = 1.0
 MIRROR = 0.5            # share of windows flipped left <-> right
 LENGTH = HISTORY + K
+DATA = "data/wm2"       # data/wm2 (old trips) or data/wm2_fast (old + fast trips), from wm2/prepare.py
+INIT = None             # a trained run to start from (fine-tuning on new trips) instead of random weights
 
 
 def losses(encoder, predictor, data, starts, mirror):
@@ -48,24 +51,34 @@ def losses(encoder, predictor, data, starts, mirror):
 
 
 def main():
-    global RUN, EPOCHS
+    global RUN, EPOCHS, DATA, INIT, LR
     if len(sys.argv) > 1:
         RUN = sys.argv[1]
     if len(sys.argv) > 2:
         EPOCHS = int(sys.argv[2])
+    if len(sys.argv) > 3:
+        DATA = sys.argv[3]
+    if len(sys.argv) > 4:
+        INIT = sys.argv[4]
+    if len(sys.argv) > 5:
+        LR = float(sys.argv[5])
     folder = f"{RUNS_DIR}/{RUN}"
     os.makedirs(folder)     # no exist_ok: if this model already exists, the training stops here and overwrites nothing
     settings = {"MODEL": "wm2", "INPUT": "lidar", "BEAMS": BEAMS, "LATENT": LATENT, "HISTORY": HISTORY, "K": K,
                 "WIDTH": WIDTH, "LAYERS": LAYERS, "EPOCHS": EPOCHS, "BATCH": BATCH, "LR": LR,
                 "SIGREG_WEIGHT": SIGREG_WEIGHT, "SPEED_WEIGHT": SPEED_WEIGHT, "MIRROR": MIRROR,
-                "DATA_DIR": "data/wm2 (from data/random_practice, split data/train.txt, val.txt, test.txt)",
+                "WM2_DATA": DATA, "INIT": INIT, "DATA_DIR": "see wm2/prepare.py SETS",
                 "date": datetime.datetime.now().isoformat(timespec="minutes")}
     with open(f"{folder}/settings.json", "w") as f:
         json.dump(settings, f, indent=2)
 
-    train, val = load_split("train", DEVICE), load_split("val", DEVICE)
+    train, val = load_split("train", DEVICE, DATA), load_split("val", DEVICE, DATA)
     train_starts, val_starts = window_starts(train["trip"], LENGTH), window_starts(val["trip"], LENGTH)
     encoder, predictor = Encoder().to(DEVICE), Predictor().to(DEVICE)
+    if INIT:
+        encoder.load_state_dict(torch.load(f"{RUNS_DIR}/{INIT}/encoder.pt", map_location=DEVICE))
+        predictor.load_state_dict(torch.load(f"{RUNS_DIR}/{INIT}/predictor.pt", map_location=DEVICE))
+        print(f"starting from {INIT}, lr {LR}")
     print(f"encoder {count(encoder):,} + predictor {count(predictor):,} numbers; "
           f"{len(train_starts):,} train windows, {len(val_starts):,} val windows")
     params = list(encoder.parameters()) + list(predictor.parameters())

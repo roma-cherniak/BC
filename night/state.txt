@@ -3,3 +3,22 @@
 2026-11-08 13:32:41  collect: collector stopped
 2026-11-08 13:33:01  train: start wm2_k10, 20 epochs
 2026-11-08 16:54:46  train: finished, exit code 0
+2026-11-09 01:35:29  collect: start (the planner drives itself, trips -> data/self_practice)
+2026-11-09 02:11:12  collect: driver problem (exit 1) -> restart 1
+2026-11-09 02:15:54  collect: driver problem (exit 1) -> restart 2
+2026-11-09 06:05:31  collect: 4.5 h reached -> stop collecting
+2026-11-09 06:05:36  collect: driver stopped
+2026-11-09 06:05:41  sim: closed
+2026-11-09 06:06:01  train: split - start
+2026-11-09 06:06:02  train: split - finished, exit code 0
+2026-11-09 06:06:02  train: prepare - start
+2026-11-09 06:06:53  train: prepare - finished, exit code 0
+2026-11-09 06:06:53  train: train - start
+2026-11-09 07:54:58  train: train - finished, exit code 0
+2026-11-09 07:54:58  train: heads sectors - start
+2026-11-09 07:55:36  train: heads sectors - finished, exit code 0
+2026-11-09 07:55:36  train: heads walls5 - start
+2026-11-09 07:56:10  train: heads walls5 - finished, exit code 0
+2026-11-09 07:56:10  train: compare - start
+2026-11-09 07:56:23  train: compare - finished, exit code 0
+2026-11-09 07:56:23  night: ALL DONE

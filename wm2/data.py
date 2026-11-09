@@ -1,14 +1,22 @@
 # wm2 data on the graphics card: windows of consecutive moments inside one trip, mirrored on the fly.
 
+import json
+
 import numpy as np
 import torch
 
 DATA_DIR = "data/wm2"
 
 
-def load_split(split, device):
-    # data/wm2/<split>.npz (made by wm2/prepare.py) -> dict of tensors on the device (+ numpy mode/time for checks)
-    with np.load(f"{DATA_DIR}/{split}.npz") as f:
+def run_data_dir(run):
+    # the data a wm2 model was trained on (settings.json "WM2_DATA"; the first models: data/wm2)
+    with open(f"runs/{run}/settings.json") as f:
+        return json.load(f).get("WM2_DATA", DATA_DIR)
+
+
+def load_split(split, device, data_dir=DATA_DIR):
+    # <data_dir>/<split>.npz (made by wm2/prepare.py) -> dict of tensors on the device (+ numpy mode/time for checks)
+    with np.load(f"{data_dir}/{split}.npz") as f:
         d = {key: f[key] for key in f.files}
     out = {key: torch.from_numpy(d[key]).to(device) for key in ["lidar", "state", "action", "trip", "progress", "danger"]}
     out["mode"], out["time"] = d["mode"], d["time"]
