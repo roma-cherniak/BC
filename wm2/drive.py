@@ -165,6 +165,12 @@ def grid_plan(z, past, prefix, steer_now, speed_now, gas_top=GAS_TOP, old=None):
     plans[:, :, d:, 0] = profiles[None, :, : horizon - d]                             # the profile starts after the prefix
     plans[..., 1] = steer[:, None, None]
     plans = plans.flatten(0, 1)
+    if old is not None and speed_now < CREEP_SPEED:
+        # 2026-11-09 evening (FRONT_BASE 0.3): stuck for good 0.18 m before a wall, gas 0 every plan. The grid has no
+        # gas 0 when nearly standing (gas_profiles), but the warm-start plan still had it, and standing still never
+        # comes closer to a wall -> it won forever. So the old plan must creep too.
+        old = old.clone()
+        old[d:, 0] = old[d:, 0].clamp(min=grid_gas(gas_top)[1] / THROTTLE_MAX)
     keep = plans[-1] if old is None else old                                         # always n_s x n_p + 1 plans:
     plans = torch.cat([plans, keep[None]])                                           # fixed shapes for the graphs
     plans[:, :d] = prefix

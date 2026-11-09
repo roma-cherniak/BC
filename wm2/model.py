@@ -1,14 +1,3 @@
-# wm2: a LeWorldModel-style JEPA for the lidar (LeWM: arXiv 2603.19312, in literarute/), sized for the laptop.
-#
-#   Encoder   one moment (109 lidar beams + the car's state) -> z (LATENT numbers)
-#             1D convolutions along the beams: the same filters work at every angle, so a corner looks the same
-#             wherever it is; then a projector with BatchNorm, like LeWM (SIGReg needs a projected, non-normalised z)
-#   Predictor a small causal transformer over the last HISTORY z's: it sees how things MOVE, not one photo.
-#             The action of every moment steers every layer through AdaLN (zero-initialised, like LeWM) instead of
-#             being glued to the input. It predicts the CHANGE of z (z_next = z + dz) and the next speed.
-#
-# Sizes for 109 beams: encoder ~0.45 M, predictor ~1.3 M numbers. Everything works for any batch B.
-
 import math
 
 import torch

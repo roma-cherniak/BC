@@ -9,6 +9,10 @@
 #                                   the sides and diagonals need SIDE_MARGIN
 #                      + W_DANGER x sum of P(danger)            (danger head)
 #                      + W_SMOOTH x sum of |steering change|
+#                      - W_END    x imagined speed at the END of the plan (terminal value, metres)
+# The plan sees only 1 s: slowing down costs little progress inside it, but the slow car also loses every second
+# AFTER it. W_END (seconds) counts the end speed as that many more seconds of driving, so "brake and stay slow"
+# is no longer cheap. The front margin (v^2 / 2a at every step, also the last) keeps a fast end speed safe.
 # Everything is batched: M moments x SAMPLES sequences at once.
 
 import torch
@@ -28,6 +32,7 @@ W_WALL = 20.0
 W_DANGER = 0.05
 W_SMOOTH = 0.02
 W_CENTER = 0.0          # x (left wall - right wall)^2 per step: 0 offline; the sim driver sets it (wm2/drive.py)
+W_END = 0.0             # s: reward for the imagined end speed (0 = off, as before 2026-11-09 evening)
 STD_START = (0.3, 0.6)  # (throttle in model units, steering)
 STD_MIN = 0.05
 
@@ -56,7 +61,7 @@ def sequence_cost(predictor, heads, z_hist, past_actions, plans, same=0, roll=No
     steer = torch.cat([past_actions[:, -1:, 1], plans[..., 1]], dim=1)
     cost = (-progress.sum(1) + W_WALL * (front_short ** 2 + side_short ** 2).sum(1)
             + W_DANGER * torch.sigmoid(danger).sum(1) + W_SMOOTH * steer.diff(dim=1).abs().sum(1)
-            + W_CENTER * center.sum(1))
+            + W_CENTER * center.sum(1) - W_END * v[:, -1])
     return cost
 
 
