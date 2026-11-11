@@ -1,0 +1,17 @@
+2026-11-10 01:13:26  collect: start, 2.5 h, driver {'WM2_COST': 'FRONT_BASE=0.25', 'WM2_SOFT': '1', 'WM2_EXPLORE_GAS': '0.12,0.15,0.18', 'WM2_SELF_DIR': 'data/self2_practice'}
+2026-11-10 01:37:16  paused by the user (supervisor + driver stopped; sim left open; no training started)
+2026-11-10 01:44:12  collect: start, 2.1 h, driver {'WM2_COST': 'FRONT_BASE=0.25', 'WM2_SOFT': '1', 'WM2_EXPLORE_GAS': '0.12,0.15,0.18', 'WM2_SELF_DIR': 'data/self2_practice'}
+2026-11-10 03:50:25  collect: 2.1 h reached -> stop collecting
+2026-11-10 03:50:30  collect: driver stopped
+2026-11-10 03:50:35  sim: closed
+2026-11-10 03:50:55  train: split - start
+2026-11-10 03:50:56  train: split - finished, exit code 0
+2026-11-10 03:50:56  train: prepare - start
+2026-11-10 03:52:05  train: prepare - finished, exit code 0
+2026-11-10 03:52:05  train: train - start
+2026-11-10 05:06:56  train: train - finished, exit code 0
+2026-11-10 05:06:56  train: heads sectors - start
+2026-11-10 05:07:35  train: heads sectors - finished, exit code 0
+2026-11-10 05:07:35  train: heads walls5 - start
+2026-11-10 05:08:10  train: heads walls5 - finished, exit code 0
+2026-11-10 05:08:11  night: ALL DONE

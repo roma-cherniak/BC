@@ -32,7 +32,15 @@ SETS = {
     # + the trips the planner drove itself (wm2/drive.py ... explore -> data/self_practice, split with "split")
     "self": ("data/wm2_self", {s: [f"data/{s}.txt", f"data/fast_{s}.txt", f"data/self_{s}.txt"]
                                for s in ["train", "val", "test"]}),
+    # round C2 (2026-11-10): + the trips of the faster driver with soft brakes (data/self2_practice)
+    "self2": ("data/wm2_self2", {s: [f"data/{s}.txt", f"data/fast_{s}.txt", f"data/self_{s}.txt", f"data/self2_{s}.txt"]
+                                 for s in ["train", "val", "test"]}),
 }
+# 2026-11-11, the first set with TWO tracks: self2 + the compete trips of the night 11 -> 12 Nov. "fastc" = random
+# trips (data/fast_compete), "selfc" = self-driven trips (data/self_compete). The night may skip the self-driven
+# part, so a list that does not exist is left out.
+SETS["c1"] = ("data/wm2_c1", {s: SETS["self2"][1][s] + [p for p in (f"data/fastc_{s}.txt", f"data/selfc_{s}.txt")
+                                                        if os.path.exists(p)] for s in ["train", "val", "test"]})
 MAX_STEER_RAD = 0.5236      # rad, full steering of the AutoDRIVE car (30 degrees): wheel angle -> -1 .. 1
 DANGER_STEPS = 10           # 10 x 0.05 s = 0.5 s, the same window as checks/check_planner
 GAP = 0.3                   # s: rows further apart than this are two pieces of the trip (the game paused sending:

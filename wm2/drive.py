@@ -9,6 +9,7 @@
 # Run from the BC folder, with the practice sim open, then click "Connect" in the game:
 #     venv\Scripts\python -m wm2.drive               (model wm2_k10; the log: runs/wm2_k10/drive_practice.csv)
 #     venv\Scripts\python -m wm2.drive wm2_fast_k10 0.09 gas09   (model, top gas of the grid, log name tag)
+# Another track: open that sim and  set WM2_TRACK=compete  first (the log: runs/<model>/drive_compete_<tag>.csv)
 
 import csv
 import glob
@@ -42,13 +43,20 @@ TAG = f"_{sys.argv[3]}" if len(sys.argv) > 3 else ""             # drive_practic
 # data also show what happens when the car does NOT do what the planner wanted (mode "explore", else "self").
 EXPLORE = len(sys.argv) > 4 and sys.argv[4] == "explore"
 EXPLORE_GAS = [0.09, 0.12, 0.15, 0.18]
+# round C2 (2026-11-10): faster ceilings and its own folder, e.g. set WM2_EXPLORE_GAS=0.12,0.15,0.18
+if os.environ.get("WM2_EXPLORE_GAS"):
+    EXPLORE_GAS = [float(g) for g in os.environ["WM2_EXPLORE_GAS"].split(",")]
 NOISE_START = 0.015             # chance per 0.05 s frame that a noise event begins (~10% of the time noisy)
 NOISE_STEER = (0.3, 0.7)        # size of a steering offset (either sign), steering units -1 .. 1
 NOISE_STEER_TIME = (0.2, 0.6)   # s
 NOISE_BRAKE_TIME = (0.15, 0.4)  # s of gas 0
 TRIP_MAX = 60.0                 # s: a longer trip is saved and a new one begins (no reset, the car keeps driving)
-SELF_DIR = "data/self_practice"
-TRACK = "practice"
+# 2026-11-11: the track is a setting, e.g. set WM2_TRACK=compete (with the compete sim open). It names the log
+# (runs/<model>/drive_<track>_<tag>.csv), the "track" field of the recorded trips and their default folder.
+TRACK = os.environ.get("WM2_TRACK") or "practice"
+if TRACK not in ("practice", "compete"):
+    sys.exit(f"WM2_TRACK: unknown track {TRACK!r} (practice or compete)")
+SELF_DIR = os.environ.get("WM2_SELF_DIR", f"data/self_{TRACK}")     # round C2: data/self2_practice
 DEVICE = "cpu"
 THREADS = 6                     # CPU threads for the planner
 SIZE = dict(samples=32, iters=1, horizon=20, elites=6)   # try 3 (24/2/16) took 0.34 s in the sim -> 8 of 16 steps
@@ -84,6 +92,10 @@ cem.SIDE_MARGIN = 0.45
 cem.W_CENTER = 0.3
 cem.SIDE_MARGIN = 0.35
 cem.FRONT_BASE = 0.4
+# 2026-11-09/10 tuning (self1, gas 0.12, GPU, 5.5 min each, claude_tools/summary.py): FRONT_BASE 0.4 lap median 15.6 s,
+# 0.35 15.5, 0.3 14.3-14.4, 0.25 13.4-13.6 (0-1 crash per 5.5 min, mostly the inner right wall at 2-3 m/s);
+# + soft brakes (SOFT_BRAKE): gas 0 13% instead of 17%, fewer hard brakes, same lap times. W_END 1 was worse (21 s).
+cem.FRONT_BASE = 0.25
 # for tuning in the sim without editing this file:  set WM2_COST=W_CENTER=0.3,SIDE_MARGIN=0.35,FRONT_BASE=0.4
 for item in filter(None, os.environ.get("WM2_COST", "").split(",")):
     name, value = item.split("=")
@@ -129,6 +141,10 @@ def grid_gas(top):
 
 GRID_GAS = grid_gas(GAS_TOP)
 BRAKE_STEPS = [3, 6]            # "brake 0.15 s / 0.3 s, then gas" plans (see gas_profiles)
+# 2026-11-10: gas 0 is a hard brake in the sim (1.4 m/s -> 0 in 0.3 s), and the lowest gas above 0 only came as a
+# constant for the whole plan, so "slow down a little" was often a full brake. Soft brake plans: "lowest gas
+# (0.04 at ceiling 0.12) for BRAKE_STEPS steps, then gas" = the car rolls slower without stopping.
+SOFT_BRAKE = os.environ.get("WM2_SOFT", "1") == "1"     # set WM2_SOFT=0 for the old hard-brake-only grid
 W_SWITCH = 0.3                  # cost per unit of steering change from the steering driven now
 CREEP_SPEED = 0.3               # m/s: slower than this, braking (gas 0) is not an option
 
@@ -142,9 +158,12 @@ def gas_profiles(gas_top, speed_now):
     gas = [g for g in grid_gas(gas_top) if g > 0 or speed_now >= CREEP_SPEED]
     profiles = [[g] * horizon for g in gas]
     if speed_now >= CREEP_SPEED:
+        levels = grid_gas(gas_top)
+        brakes = [0.0] + ([levels[1]] if SOFT_BRAKE else [])          # hard brake, soft brake (lowest gas)
         for k in BRAKE_STEPS:
-            for g in {gas_top, grid_gas(gas_top)[len(grid_gas(gas_top)) // 2]}:
-                profiles.append([0.0] * k + [g] * (horizon - k))
+            for g in sorted({gas_top, levels[len(levels) // 2]}):
+                for b in brakes:
+                    profiles.append([b] * k + [g] * (horizon - k))
     return profiles
 
 
