@@ -1052,3 +1052,29 @@ compared on one graph ([goals/month.md](../goals/month.md)).
 - **Real tracks:** `fiit-oval` 79.5 m, `hairpin-valley` 100.8 m, `danube-chicane` 89.6 m; each with centre / left / right
   lines (795 points on the oval) and the start pose, width 2.6 m → `garage_sim` can use the real geometry.
 - **Why it matters:** the real AIL Cup can be the loop's judge itself (the user's design, 16 Nov), not only a manual check.
+
+### E37 — Baseline 3× on all 3 real AIL Cup tracks: the noise of the judge (16 Nov 2026)
+- **Setup:** `ail_cup/simple_controller.py` v5 + `wm2_c4_value_garage.npz`, 2 laps, `--track` slug, 3 runs per track,
+  `autoresearch/ailcup_client.py`. Files: `night/ailcup_base_<track>_<i>.json` (runs #1300 – #1308).
+- **Result: 9 / 9 finished, no DNF.** Total time of 2 laps (s), step() p95 130 – 135 ms on every run:
+
+  | Track | Run 1 | Run 2 | Run 3 | Mean | Spread (max − min) |
+  |---|---|---|---|---|---|
+  | fiit-oval | 98.018 | 97.988 | 98.153 | **98.05** | 0.17 |
+  | hairpin-valley | 125.157 | 124.944 | 124.916 | **125.01** | 0.24 |
+  | danube-chicane | 114.420 | 115.566 | 114.265 | **114.75** | 1.30 |
+  | **Sum (the score)** | 337.595 | 338.498 | 337.334 | **337.81** | **1.16** (sd 0.50) |
+- **Conclusion:** the real AIL Cup is an almost deterministic judge (oval sd 0.07 s); the chicane is the noisiest track.
+  Proposed keep rule for the loop: a change is kept only if its sum is **below the best by more than 1.5 s** (> the
+  baseline spread of 1.16 s, ~0.45 % of the score). The baseline score = **337.8 s**, the first point on the graph.
+
+### E38 — The first real judge run: 3 tracks at once score 2.5 s worse (17 Nov 2026)
+- **Setup:** `venv\Scripts\python -m autoresearch.judge` (the baseline: simple_controller v5 + wm2_c4), the 3 test
+  drives started **at the same time** (one upload). File: `night/judge_test.json`, runs #1309 – #1311.
+- **Result:** all finished, code ok, p95 130 – 135 ms. Oval 98.18, hairpin 125.26, chicane **116.83**; score **340.27 s**
+  vs the E37 baseline 337.81 (range 337.33 – 338.50, tracks one after another). The chicane is 1.3 s above its E37 range.
+- **Likely cause (not proven):** the controller's rollout has a time budget (`BUDGET_SHARE`, deadline in `imagine()`),
+  so with 3 runs at once on the same server it plans fewer steps and drives slower. One run only: could also be noise.
+- **Consequence:** the baseline and the experiments must be judged the same way; the 1.5 s keep margin (E37) is only
+  valid for runs one after another. **Decision (the user, 17 Nov): the judge runs the tracks one after another**
+  (`judge.py`, test `test_tracks_run_one_after_another`).

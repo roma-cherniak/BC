@@ -122,6 +122,14 @@ class AilCupClient:
             time.sleep(POLL_EVERY_S)
         raise AilCupError(f"run {job_id} not finished after {wait_max_s:.0f} s")
 
+    def upload(self, code: str, model_bytes: bytes | None, model_name: str, label: str) -> int | None:
+        """Save a version and attach the model once; its id is then used by every test drive (model_from)."""
+        if model_bytes is None:
+            return None
+        submission_id = _field(self.save_version(code, label), "id", "save version")
+        self.attach_model(submission_id, model_bytes, model_name)
+        return submission_id
+
     # ---------- the whole flow
     def test_drive(self, code_path: Path, model_path: Path | None, laps: int,
                    track: str | None, label: str) -> dict:

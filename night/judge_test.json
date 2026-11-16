@@ -1,0 +1,63 @@
+{
+ "score": {
+  "total_s": 340.271,
+  "per_track_s": {
+   "fiit-oval": 98.18,
+   "hairpin-valley": 125.264,
+   "danube-chicane": 116.827
+  },
+  "dnf_tracks": []
+ },
+ "rows": {
+  "fiit-oval": {
+   "label": "judge test fiit-oval",
+   "run_id": 1309,
+   "sim_error": null,
+   "finished": true,
+   "total_time_s": 98.18,
+   "dnf_reason": null,
+   "dnf_detail": null,
+   "energy_wh": 0.6227,
+   "step_p95_ms": 135.0,
+   "code_check": {
+    "ok": true,
+    "problems": []
+   },
+   "driver_log_tail": "simple_controller v5 (numpy, 18 plans x 5 steps, 75 ms budget, no prints while driving)\nINIT: MODEL = wm2_c4 + value exported 2026-11-14, value head = True\n"
+  },
+  "hairpin-valley": {
+   "label": "judge test hairpin-valley",
+   "run_id": 1310,
+   "sim_error": null,
+   "finished": true,
+   "total_time_s": 125.264,
+   "dnf_reason": null,
+   "dnf_detail": null,
+   "energy_wh": 0.7942,
+   "step_p95_ms": 135.0,
+   "code_check": {
+    "ok": true,
+    "problems": []
+   },
+   "driver_log_tail": "simple_controller v5 (numpy, 18 plans x 5 steps, 75 ms budget, no prints while driving)\nINIT: MODEL = wm2_c4 + value exported 2026-11-14, value head = True\n"
+  },
+  "danube-chicane": {
+   "label": "judge test danube-chicane",
+   "run_id": 1311,
+   "sim_error": null,
+   "finished": true,
+   "total_time_s": 116.827,
+   "dnf_reason": null,
+   "dnf_detail": null,
+   "energy_wh": 0.7407,
+   "step_p95_ms": 130.0,
+   "code_check": {
+    "ok": true,
+    "problems": []
+   },
+   "driver_log_tail": "simple_controller v5 (numpy, 18 plans x 5 steps, 75 ms budget, no prints while driving)\nINIT: MODEL = wm2_c4 + value exported 2026-11-14, value head = True\n"
+  }
+ },
+ "code_ok": true,
+ "code_problems": []
+}

@@ -64,6 +64,7 @@ Today only offline checks, the sim is busy.
 | 2026-11-11 | `research/` is archived (`archive/research/`); the loop is written new in `autoresearch/`. |
 | 2026-11-11 | The 3 AIL Cup maps: an oval, a winding track, an oval with two chicanes. Pictures in `docs/ail_cup_maps/`. See D17. |
 | 2026-11-11 | `explore` is not a track: data is collected only on `practice` and `compete`. |
+| 2026-11-17 | The judge runs the 3 tracks **one after another** (like the E37 baseline); 3 at once scored 2.5 s worse (E38). Every loop run starts from the branch `autoresearch/base`; **`main` is never moved by the loop** (the user keeps it as the safe copy). |
 | 2026-11-16 | Baseline frozen: `wm2_c4` + `ail_cup/simple_controller.py` v5. No more hand fixes; week 2 starts Tue 17. |
 | 2026-11-16 | Score = lap time (lower is better), a crash / DNF = a big fixed penalty. |
 | 2026-11-16 | The goal is the **real** AIL Cup (not `garage_sim`). The project is a university project / thesis: the graph and a clear method matter most. |
