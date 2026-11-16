@@ -1,0 +1,13 @@
+data/self3_compete\drive_0024.npz
+data/self3_compete\drive_0064.npz
+data/self3_compete\drive_0135.npz
+data/self3_compete\drive_0010.npz
+data/self3_compete\drive_0130.npz
+data/self3_compete\drive_0017.npz
+data/self3_compete\drive_0075.npz
+data/self3_compete\drive_0106.npz
+data/self3_compete\drive_0086.npz
+data/self3_compete\drive_0107.npz
+data/self3_compete\drive_0002.npz
+data/self3_compete\drive_0133.npz
+data/self3_compete\drive_0099.npz

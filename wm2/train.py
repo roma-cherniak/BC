@@ -17,11 +17,13 @@ import os
 import sys
 import time
 
+import numpy as np
 import torch
 
 from config import DEVICE, RUNS_DIR
 from core.sigreg import sigreg
-from wm2.data import load_split, window_starts, windows
+from wm2.data import (balance_setting, draw_order, load_split, random_scales, sample_weights, scale_setting,
+                      window_starts, windows)
 from wm2.model import BEAMS, HISTORY, LATENT, LAYERS, WIDTH, Encoder, Predictor, count, rollout
 
 RUN = "wm2_k10"         # the name of the NEW model: change it before every new training
@@ -33,13 +35,16 @@ WEIGHT_DECAY = 1e-3
 SIGREG_WEIGHT = 0.1     # LeWM's lambda
 SPEED_WEIGHT = 1.0
 MIRROR = 0.5            # share of windows flipped left <-> right
+SCALE = scale_setting() # (low, high) or None: set WM2_SCALE=0.6,2.2 to show SCALE_SHARE of the windows as the same
+SCALE_SHARE = 0.7       # drive in a world that many times bigger (wm2/data.py windows; E26). Validation: unscaled
 LENGTH = HISTORY + K
 DATA = "data/wm2"       # data/wm2 (old trips) or data/wm2_fast (old + fast trips), from wm2/prepare.py
+BALANCE = balance_setting()  # WM2_BALANCE=1: windows drawn by wm2/data.py sample_weights (A1 + A2), else all alike
 INIT = None             # a trained run to start from (fine-tuning on new trips) instead of random weights
 
 
-def losses(encoder, predictor, data, starts, mirror):
-    lidar, state, action = windows(data, starts, LENGTH, mirror)
+def losses(encoder, predictor, data, starts, mirror, scale=None):
+    lidar, state, action = windows(data, starts, LENGTH, mirror, scale)
     B = len(starts)
     z = encoder(lidar.flatten(0, 1), state.flatten(0, 1)).view(B, LENGTH, LATENT)
     z_imag, speed_imag = rollout(predictor, z[:, :HISTORY], action[:, : LENGTH - 1])
@@ -67,13 +72,19 @@ def main():
     settings = {"MODEL": "wm2", "INPUT": "lidar", "BEAMS": BEAMS, "LATENT": LATENT, "HISTORY": HISTORY, "K": K,
                 "WIDTH": WIDTH, "LAYERS": LAYERS, "EPOCHS": EPOCHS, "BATCH": BATCH, "LR": LR,
                 "SIGREG_WEIGHT": SIGREG_WEIGHT, "SPEED_WEIGHT": SPEED_WEIGHT, "MIRROR": MIRROR,
-                "WM2_DATA": DATA, "INIT": INIT, "DATA_DIR": "see wm2/prepare.py SETS",
+                "SCALE": SCALE, "SCALE_SHARE": SCALE_SHARE if SCALE else None,
+                "WM2_DATA": DATA, "INIT": INIT, "BALANCE": BALANCE, "DATA_DIR": "see wm2/prepare.py SETS",
                 "date": datetime.datetime.now().isoformat(timespec="minutes")}
     with open(f"{folder}/settings.json", "w") as f:
         json.dump(settings, f, indent=2)
 
     train, val = load_split("train", DEVICE, DATA), load_split("val", DEVICE, DATA)
     train_starts, val_starts = window_starts(train["trip"], LENGTH), window_starts(val["trip"], LENGTH)
+    weights = sample_weights(train, train_starts) if BALANCE else None
+    if BALANCE:
+        for name in np.unique(train["track"]):
+            m = torch.from_numpy(train["track"][train_starts.numpy()] == name)
+            print(f"balance: {name} {m.float().mean():.1%} of the windows -> {weights[m].sum():.1%} of the draws")
     encoder, predictor = Encoder().to(DEVICE), Predictor().to(DEVICE)
     if INIT:
         encoder.load_state_dict(torch.load(f"{RUNS_DIR}/{INIT}/encoder.pt", map_location=DEVICE))
@@ -93,11 +104,12 @@ def main():
     for epoch in range(EPOCHS):
         t0 = time.time()
         encoder.train(), predictor.train()
-        order = train_starts[torch.randperm(len(train_starts))]
+        order = draw_order(train_starts, weights) if BALANCE else train_starts[torch.randperm(len(train_starts))]
         sums = torch.zeros(3)
         for start in range(0, len(order), BATCH):
             starts = order[start : start + BATCH]
-            pred, speed, reg, _, _ = losses(encoder, predictor, train, starts, torch.rand(len(starts)) < MIRROR)
+            scale = random_scales(len(starts), SCALE, SCALE_SHARE) if SCALE else None
+            pred, speed, reg, _, _ = losses(encoder, predictor, train, starts, torch.rand(len(starts)) < MIRROR, scale)
             loss = pred + SPEED_WEIGHT * speed + SIGREG_WEIGHT * reg
             optimizer.zero_grad()
             loss.backward()

@@ -20,12 +20,16 @@ PY = os.path.join(BC, "venv", "Scripts", "python.exe")
 HERE = os.path.join(BC, "night")
 STATE = os.path.join(HERE, "state_compete.txt")
 SIM = "AutoDRIVE Simulator.exe"
-TEACHER, STUDENT = "wm2_self2", "wm2_c1"
+TEACHER = os.environ.get("NIGHTC_TEACHER", "wm2_self2")         # 12 Nov, second round: wm2_c1 -> wm2_c2
+STUDENT = os.environ.get("NIGHTC_STUDENT", "wm2_c1")            # its data set: wm2.prepare <the name without "wm2_">
+MIN_NEW = int(os.environ.get("NIGHTC_MIN_NEW", "0"))            # trips the newest folder must hold, or no training
 EPOCHS = os.environ.get("NIGHTC_EPOCHS", "3")
 MIN_TRIPS = 50                  # random compete trips (~1 minute each): fewer is not worth a training
 MAX_WAIT = 12 * 3600            # s to wait for the night to end
 OVER = ("night: ALL DONE", "night: ended early", "supervisor crashed", "night: NOT STARTED")
 FOLDERS = {"fastc": "data/fast_compete", "selfc": "data/self_compete"}
+for item in filter(None, os.environ.get("NIGHTC_EXTRA", "").split(",")):       # selfc2=data/self2_compete,...
+    FOLDERS[item.split("=")[0]] = item.split("=")[1]
 
 
 def say(text: str) -> None:
@@ -67,8 +71,8 @@ def steps() -> list[tuple[str, list[str]]]:
         else:
             say(f"train: {folder} has {trips(name)} trips -> left out")
     return todo + [
-        ("prepare", [PY, "-u", "-m", "wm2.prepare", "c1"]),
-        ("train", [PY, "-u", "-m", "wm2.train", STUDENT, EPOCHS, "data/wm2_c1", TEACHER, "1e-4"]),
+        ("prepare", [PY, "-u", "-m", "wm2.prepare", STUDENT.removeprefix("wm2_")]),
+        ("train", [PY, "-u", "-m", "wm2.train", STUDENT, EPOCHS, f"data/{STUDENT}", TEACHER, "1e-4"]),
         ("heads sectors", [PY, "-u", "-m", "wm2.heads", STUDENT, "sectors"]),
         ("heads walls5", [PY, "-u", "-m", "wm2.heads", STUDENT, "walls5"]),
     ]
@@ -83,6 +87,9 @@ def why_not() -> str | None:
         return "the simulator is still open (4 GB card: never the sim and a training together)"
     if running("python.exe", ("wm2.drive", "collection_random", "wm2.train")):
         return "a driver, a collector or another training is still running"
+    newest = list(FOLDERS)[-1]
+    if trips(newest) < MIN_NEW:
+        return f"{FOLDERS[newest]} has only {trips(newest)} trips (too little new driving for a training)"
     if trips("fastc") < MIN_TRIPS:
         return f"only {trips('fastc')} random compete trips (at least {MIN_TRIPS} are needed)"
     return None
@@ -103,7 +110,8 @@ def main() -> None:
         return
     for name, command in steps():
         say(f"train: {name} - start")
-        with open(os.path.join(HERE, f"c1_{name.split()[0]}.log"), "a", encoding="utf-8") as log:
+        with open(os.path.join(HERE, f"{STUDENT.removeprefix('wm2_')}_{name.split()[0]}.log"), "a",
+                  encoding="utf-8") as log:
             code = subprocess.run(command, cwd=BC, stdout=log, stderr=subprocess.STDOUT).returncode
         say(f"train: {name} - finished, exit code {code}")
         if code != 0:

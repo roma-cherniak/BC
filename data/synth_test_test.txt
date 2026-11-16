@@ -1,0 +1,2 @@
+data/synth_test\drive_00008_0.npz
+data/synth_test\drive_00008_1.npz

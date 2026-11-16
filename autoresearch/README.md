@@ -23,6 +23,7 @@ autoresearch/
 ├── eval/                THE JUDGE: agents never edit it
 │   ├── __init__.py
 │   ├── drive_stats.py   drive log CSV -> crashes/min, speed, closest wall, laps                       (Wed 11)
+│   ├── corridor_test.py drawn corridors of many widths -> wall error on widths the model never saw   (Fri 13)
 │   ├── drive_eval.py    drive one model for a fixed time on every track, save the logs                (Mon 16)
 │   └── score.py         stats of all tracks -> ONE score (the user's formula in goals/month.md)       (Mon 16)
 ├── tests/               pytest tests of the judge: venv\Scripts\python -m pytest autoresearch/tests -q
@@ -48,4 +49,7 @@ autoresearch/
 |---|---|
 | folder + architecture | ✓ 2026-11-11 |
 | `eval/drive_stats.py` + tests | in progress 2026-11-11: `wall_clearance` is not defined yet (8 of 10 tests pass) |
+| `eval/corridor_test.py` + tests | done 2026-11-13: baseline wm2_c2 side error 0.13 m on known widths, 0.59 m on new ones (E25) |
+| scale + mirror augmentation (`wm2/data.py`, `WM2_SCALE`) + tests | done 2026-11-13: wm2_c3 side error 0.07 m on known widths, 0.10 m on new ones, mirror gap 0.19 m (E26); no sim drive yet |
+| `data_report.py` (dataset diversity) | done 2026-11-13: problems in `docs/data_problems.md`, solutions in `docs/data_solve.md` (E28) |
 | everything else | see the day plans in [goals/days/](../goals/days/) |

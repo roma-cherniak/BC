@@ -1,7 +1,12 @@
 import math
 import numpy as np
 import random
+import os
+
 from config import THROTTLE_MIN, THROTTLE_TOP
+
+# 2026-11-14 (B1 speed ladder, docs/data_solve.md): set COLLECT_THROTTLE_TOP=0.25 for another random-throttle ceiling
+THROTTLE_TOP = float(os.environ.get("COLLECT_THROTTLE_TOP", THROTTLE_TOP))
 
 # working range from 180 to 900
 # 900 - left , 180 - rinht

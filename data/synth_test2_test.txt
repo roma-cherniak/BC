@@ -1,0 +1,8 @@
+data/synth_test2\drive_00020_0.npz
+data/synth_test2\drive_00020_1.npz
+data/synth_test2\drive_00020_2.npz
+data/synth_test2\drive_00020_3.npz
+data/synth_test2\drive_00014_0.npz
+data/synth_test2\drive_00014_1.npz
+data/synth_test2\drive_00014_2.npz
+data/synth_test2\drive_00014_3.npz

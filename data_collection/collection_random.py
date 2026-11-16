@@ -27,7 +27,7 @@ next_write = 0.0
 
 
 TRACK = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in ("practice", "compete") else "practice"
-OUT_DIR = f"data/fast_{TRACK}"
+OUT_DIR = os.environ.get("COLLECT_OUT_DIR", f"data/fast_{TRACK}")   # 2026-11-14: B1 ladder -> data/speed_<track>_t<top>
 os.makedirs(OUT_DIR, exist_ok=True)
 _old = sorted(glob.glob(f"{OUT_DIR}/drive_*.npz"))
 episod = int(os.path.basename(_old[-1])[6:10]) if _old else 0      # continue after the last saved trip

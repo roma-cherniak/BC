@@ -1,0 +1,187 @@
+2026-11-11 16:29:33  night: compete, tests 2 x 330 s, random 3.0 h, self 3.0 h, driver {'WM2_TRACK': 'compete', 'WM2_COST': 'FRONT_BASE=0.25', 'WM2_SOFT': '1'}
+2026-11-11 16:29:33  night: NOT STARTED, the simulator is not running: open the COMPETE sim first
+2026-11-11 18:01:19  night: compete, tests 2 x 330 s, random 3.0 h, self 3.0 h, driver {'WM2_TRACK': 'compete', 'WM2_COST': 'FRONT_BASE=0.25', 'WM2_SOFT': '1'}
+2026-11-11 18:01:19  sim: C:\Users\1\Desktop\BP\autodrive_simulator_compete_windows\autodrive_simulator\AutoDRIVE Simulator.exe
+2026-11-11 18:01:19  test_a: start, at most 20 min
+2026-11-11 18:05:00  train: waiting for the night to end (then wm2_self2 -> wm2_c1, 3 epochs)
+2026-11-11 18:07:15  test_a: finished
+2026-11-11 18:07:26  test_b: start, at most 20 min
+2026-11-11 18:13:02  test_b: finished
+2026-11-11 18:13:12  test_a: 5.5 min, 7.8 crashes per min, mean speed 1.40 m/s
+2026-11-11 18:13:12  test_b: 5.4 min, 8.3 crashes per min, mean speed 1.41 m/s
+2026-11-11 18:13:12  random: start, at most 180 min
+2026-11-11 21:13:17  random: its time is up
+2026-11-11 21:13:27  self: start, at most 180 min
+2026-11-12 00:13:31  self: its time is up
+2026-11-12 00:13:47  sim: closed
+2026-11-12 00:13:47  night: new trips: random 300, self 1245
+2026-11-12 00:13:47  night: ALL DONE
+2026-11-12 00:15:01  train: split fastc - start
+2026-11-12 00:15:01  train: split fastc - finished, exit code 0
+2026-11-12 00:15:01  train: split selfc - start
+2026-11-12 00:15:02  train: split selfc - finished, exit code 0
+2026-11-12 00:15:02  train: prepare - start
+2026-11-12 00:16:23  train: prepare - finished, exit code 0
+2026-11-12 00:16:23  train: train - start
+2026-11-12 01:34:06  train: train - finished, exit code 0
+2026-11-12 01:34:06  train: heads sectors - start
+2026-11-12 01:34:53  train: heads sectors - finished, exit code 0
+2026-11-12 01:34:53  train: heads walls5 - start
+2026-11-12 01:35:38  train: heads walls5 - finished, exit code 0
+2026-11-12 01:35:38  train: ALL DONE
+2026-11-12 03:19:03  night: compete, tests 2 x 330 s, random 0.0 h, self 0.5 h, driver {'WM2_TRACK': 'compete', 'WM2_COST': 'FRONT_BASE=0.25,W_CENTER=0,SIDE_MARGIN=0.45', 'WM2_SOFT': '1'}, model wm2_c1, self trips -> data/self2_compete
+2026-11-12 03:19:03  sim: C:\Users\1\Desktop\BP\autodrive_simulator_compete_windows\autodrive_simulator\AutoDRIVE Simulator.exe
+2026-11-12 03:19:03  test_a: start, at most 20 min
+2026-11-12 03:24:40  test_a: finished
+2026-11-12 03:24:50  test_b: start, at most 20 min
+2026-11-12 03:30:26  test_b: finished
+2026-11-12 03:30:36  test_a: 5.4 min, 6.5 crashes per min, mean speed 1.64 m/s
+2026-11-12 03:30:36  test_b: 5.4 min, 5.2 crashes per min, mean speed 1.72 m/s
+2026-11-12 03:30:36  self: start, at most 30 min
+2026-11-12 04:00:38  self: its time is up
+2026-11-12 04:00:53  sim: closed
+2026-11-12 04:00:53  night: new trips: random 0, self 199
+2026-11-12 04:00:53  night: ALL DONE
+2026-11-12 05:00:08  night: compete, tests 2 x 330 s, random 0.0 h, self 2.0 h, driver {'WM2_TRACK': 'compete', 'WM2_COST': 'FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3', 'WM2_SOFT': '1'}, model wm2_c1, self trips -> data/self3_compete
+2026-11-12 05:00:09  sim: C:\Users\1\Desktop\BP\autodrive_simulator_compete_windows\autodrive_simulator\AutoDRIVE Simulator.exe
+2026-11-12 05:00:09  test_a: its log is already complete -> not driven again (nothing is overwritten)
+2026-11-12 05:00:09  test_b: its log is already complete -> not driven again (nothing is overwritten)
+2026-11-12 05:00:09  test_a: 5.4 min, 1.3 crashes per min, mean speed 1.44 m/s
+2026-11-12 05:00:09  test_b: 5.4 min, 1.3 crashes per min, mean speed 1.52 m/s
+2026-11-12 05:00:09  self: start, at most 120 min
+2026-11-12 05:02:20  self: nothing new for 120 s -> restart 1
+2026-11-12 05:04:18  train: waiting for the night to end (then wm2_c1 -> wm2_c2, 3 epochs)
+2026-11-12 13:22:19  night: compete, tests 2 x 330 s, random 0.0 h, self 0.17 h, driver {'WM2_TRACK': 'compete', 'WM2_COST': 'FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=1.0', 'WM2_SOFT': '1'}, model wm2_c1, self trips -> data/self4_compete
+2026-11-12 13:22:20  sim: C:\Users\1\Desktop\BP\autodrive_simulator_compete_windows\autodrive_simulator\AutoDRIVE Simulator.exe
+2026-11-12 13:22:20  test_a: its log is already complete -> not driven again (nothing is overwritten)
+2026-11-12 13:22:20  test_b: its log is already complete -> not driven again (nothing is overwritten)
+2026-11-12 13:22:20  test_a: 5.4 min, 1.3 crashes per min, mean speed 1.44 m/s
+2026-11-12 13:22:20  test_b: 5.4 min, 1.3 crashes per min, mean speed 1.52 m/s
+2026-11-12 13:22:20  self: start, at most 10 min
+2026-11-12 13:32:39  self: its time is up
+2026-11-12 13:32:54  sim: closed
+2026-11-12 13:32:54  night: new trips: random 0, self 39
+2026-11-12 13:32:54  night: ALL DONE
+2026-11-12 13:45:13  night: compete, tests 2 x 330 s, random 0.0 h, self 0.17 h, driver {'WM2_TRACK': 'compete', 'WM2_COST': 'FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=0.5', 'WM2_SOFT': '1'}, model wm2_c1, self trips -> data/self5_compete
+2026-11-12 13:45:13  sim: C:\Users\1\Desktop\BP\autodrive_simulator_compete_windows\autodrive_simulator\AutoDRIVE Simulator.exe
+2026-11-12 13:45:13  test_a: its log is already complete -> not driven again (nothing is overwritten)
+2026-11-12 13:45:13  test_b: its log is already complete -> not driven again (nothing is overwritten)
+2026-11-12 13:45:14  test_a: 5.4 min, 1.3 crashes per min, mean speed 1.44 m/s
+2026-11-12 13:45:14  test_b: 5.4 min, 1.3 crashes per min, mean speed 1.52 m/s
+2026-11-12 13:45:14  self: start, at most 10 min
+2026-11-12 13:55:33  self: its time is up
+2026-11-12 13:55:48  sim: closed
+2026-11-12 13:55:48  night: new trips: random 0, self 32
+2026-11-12 13:55:48  night: ALL DONE
+2026-11-12 14:10:32  night: compete, tests 2 x 330 s, random 0.0 h, self 0.17 h, driver {'WM2_TRACK': 'compete', 'WM2_COST': 'FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=1.0', 'WM2_SOFT': '1'}, model wm2_c1, self trips -> data/self6_compete
+2026-11-12 14:10:32  sim: C:\Users\1\Desktop\BP\autodrive_simulator_compete_windows\autodrive_simulator\AutoDRIVE Simulator.exe
+2026-11-12 14:10:32  test_a: its log is already complete -> not driven again (nothing is overwritten)
+2026-11-12 14:10:32  test_b: its log is already complete -> not driven again (nothing is overwritten)
+2026-11-12 14:10:32  test_a: 5.4 min, 1.3 crashes per min, mean speed 1.44 m/s
+2026-11-12 14:10:32  test_b: 5.4 min, 1.3 crashes per min, mean speed 1.52 m/s
+2026-11-12 14:10:32  self: start, at most 10 min
+2026-11-12 14:20:52  self: its time is up
+2026-11-12 14:21:07  sim: closed
+2026-11-12 14:21:07  night: new trips: random 0, self 27
+2026-11-12 14:21:07  night: ALL DONE
+2026-11-12 15:23:55  c2: prepare - start
+2026-11-12 15:24:42  c2: prepare - finished
+2026-11-12 15:24:42  c2: train - start
+2026-11-12 16:45:32  c2: train - finished
+2026-11-12 16:45:32  c2: heads - start
+2026-11-12 16:46:25  c2: heads - finished
+2026-11-12 16:46:25  c2: heads - start
+2026-11-12 16:47:12  c2: heads - finished
+2026-11-12 16:47:12  c2: value - start
+2026-11-12 16:47:44  c2: value - finished
+2026-11-12 16:47:44  c2: training ALL DONE
+2026-11-12 16:48:08  c2: test_compete - start
+2026-11-12 16:59:33  c2: test_compete - finished
+2026-11-12 16:59:58  c2: test_practice - start
+2026-11-12 17:11:24  c2: test_practice - finished
+2026-11-12 17:11:28  c2: tests ALL DONE
+2026-11-12 22:05:50  c3: train - start
+2026-11-12 23:27:20  c3: train - finished
+2026-11-12 23:27:20  c3: heads - start
+2026-11-12 23:28:43  c3: heads - finished
+2026-11-12 23:28:43  c3: heads - start
+2026-11-12 23:30:06  c3: heads - finished
+2026-11-12 23:30:06  c3: value - start
+2026-11-12 23:31:21  c3: value - finished
+2026-11-12 23:31:21  c3: corridor - start
+2026-11-12 23:31:27  c3: corridor - finished
+2026-11-12 23:31:27  c3: ALL DONE
+2026-11-14 00:31:45  c4: prepare - start
+2026-11-14 00:32:36  c4: prepare - finished
+2026-11-14 00:32:37  c4: train - start
+2026-11-14 01:58:10  c4: train - finished
+2026-11-14 01:58:10  c4: heads - start
+2026-11-14 01:59:30  c4: heads - finished
+2026-11-14 01:59:30  c4: heads - start
+2026-11-14 02:00:41  c4: heads - finished
+2026-11-14 02:00:41  c4: value - start
+2026-11-14 02:01:44  c4: value - finished
+2026-11-14 02:01:44  c4: corridor - start
+2026-11-14 02:01:49  c4: corridor - finished
+2026-11-14 02:01:50  c4: ALL DONE
+2026-11-14 02:02:37  ladder night: tests ['wm2_c4', 'wm2_c3'] 2 x 330 s per track, ladder [0.15, 0.2, 0.25, 0.3] x 30 min, tracks ['compete', 'practice']
+2026-11-14 02:02:37  test_wm2_c4_compete_a: start, at most 20 min
+2026-11-14 02:02:37  sim: opening the compete build and clicking Connect
+2026-11-14 02:13:08  test_wm2_c4_compete_a: the game did not connect in 600 s -> restart 1
+2026-11-14 02:16:00  test_wm2_c4_compete_a: the simulator was closed -> the night ends here
+2026-11-14 02:16:10  ladder night: ended early (the sim was closed)
+2026-11-14 02:17:02  ladder night: tests ['wm2_c4', 'wm2_c3'] 2 x 330 s per track, ladder [0.15, 0.2, 0.25, 0.3] x 30 min, tracks ['compete', 'practice']
+2026-11-14 02:17:07  sim: closed
+2026-11-14 02:17:07  test_wm2_c4_compete_a: start, at most 20 min
+2026-11-14 02:17:07  sim: opening the compete build and clicking Connect
+2026-11-14 02:23:07  test_wm2_c4_compete_a: finished
+2026-11-14 02:23:18  test wm2_c4 compete a: 5.5 min, 1.45 crashes/min, mean speed 1.69 m/s
+2026-11-14 02:23:18  test_wm2_c4_compete_b: start, at most 20 min
+2026-11-14 02:29:03  test_wm2_c4_compete_b: finished
+2026-11-14 02:29:14  test wm2_c4 compete b: 5.5 min, 0.36 crashes/min, mean speed 1.77 m/s
+2026-11-14 02:29:14  test_wm2_c3_compete_a: start, at most 20 min
+2026-11-14 02:34:59  test_wm2_c3_compete_a: finished
+2026-11-14 02:35:10  test wm2_c3 compete a: 5.4 min, 4.06 crashes/min, mean speed 1.55 m/s
+2026-11-14 02:35:10  test_wm2_c3_compete_b: start, at most 20 min
+2026-11-14 02:40:55  test_wm2_c3_compete_b: finished
+2026-11-14 02:41:05  test wm2_c3 compete b: 5.5 min, 4.33 crashes/min, mean speed 1.57 m/s
+2026-11-14 02:41:05  ladder_compete_t015: start, at most 30 min
+2026-11-14 03:11:12  ladder_compete_t015: its time is up
+2026-11-14 03:11:23  ladder compete 0.15: 53 trips, 19 min, 1.28 crashes/min, speed mean 1.34 max 3.63 m/s, > 2 m/s 17 %, > 3 m/s 2 %
+2026-11-14 03:11:23  ladder_compete_t020: start, at most 30 min
+2026-11-14 03:41:30  ladder_compete_t020: its time is up
+2026-11-14 03:41:40  ladder compete 0.2: 51 trips, 20 min, 0.84 crashes/min, speed mean 1.46 max 4.54 m/s, > 2 m/s 23 %, > 3 m/s 4 %
+2026-11-14 03:41:40  ladder_compete_t025: start, at most 30 min
+2026-11-14 04:11:47  ladder_compete_t025: its time is up
+2026-11-14 04:11:58  ladder compete 0.25: 53 trips, 18 min, 1.51 crashes/min, speed mean 1.43 max 4.79 m/s, > 2 m/s 21 %, > 3 m/s 3 %
+2026-11-14 04:11:58  ladder_compete_t030: start, at most 30 min
+2026-11-14 04:42:05  ladder_compete_t030: its time is up
+2026-11-14 04:42:16  ladder compete 0.3: 49 trips, 18 min, 1.29 crashes/min, speed mean 1.50 max 4.73 m/s, > 2 m/s 24 %, > 3 m/s 5 %
+2026-11-14 04:42:21  sim: closed
+2026-11-14 04:42:21  test_wm2_c4_practice_a: start, at most 20 min
+2026-11-14 04:42:21  sim: opening the practice build and clicking Connect
+2026-11-14 04:48:21  test_wm2_c4_practice_a: finished
+2026-11-14 04:48:32  test wm2_c4 practice a: 5.5 min, 0.00 crashes/min, mean speed 1.60 m/s
+2026-11-14 04:48:32  test_wm2_c4_practice_b: start, at most 20 min
+2026-11-14 04:54:17  test_wm2_c4_practice_b: finished
+2026-11-14 04:54:27  test wm2_c4 practice b: 5.6 min, 0.36 crashes/min, mean speed 1.64 m/s
+2026-11-14 04:54:27  test_wm2_c3_practice_a: start, at most 20 min
+2026-11-14 05:00:13  test_wm2_c3_practice_a: finished
+2026-11-14 05:00:23  test wm2_c3 practice a: 5.6 min, 0.00 crashes/min, mean speed 1.69 m/s
+2026-11-14 05:00:23  test_wm2_c3_practice_b: start, at most 20 min
+2026-11-14 05:06:09  test_wm2_c3_practice_b: finished
+2026-11-14 05:06:19  test wm2_c3 practice b: 5.6 min, 0.18 crashes/min, mean speed 1.69 m/s
+2026-11-14 05:06:19  ladder_practice_t015: start, at most 30 min
+2026-11-14 05:36:27  ladder_practice_t015: its time is up
+2026-11-14 05:36:37  ladder practice 0.15: 44 trips, 22 min, 0.09 crashes/min, speed mean 1.20 max 3.67 m/s, > 2 m/s 9 %, > 3 m/s 1 %
+2026-11-14 05:36:37  ladder_practice_t020: start, at most 30 min
+2026-11-14 06:06:45  ladder_practice_t020: its time is up
+2026-11-14 06:06:55  ladder practice 0.2: 43 trips, 21 min, 0.00 crashes/min, speed mean 1.24 max 4.30 m/s, > 2 m/s 12 %, > 3 m/s 1 %
+2026-11-14 06:06:55  ladder_practice_t025: start, at most 30 min
+2026-11-14 06:37:03  ladder_practice_t025: its time is up
+2026-11-14 06:37:14  ladder practice 0.25: 43 trips, 21 min, 0.19 crashes/min, speed mean 1.27 max 4.62 m/s, > 2 m/s 13 %, > 3 m/s 1 %
+2026-11-14 06:37:14  ladder_practice_t030: start, at most 30 min
+2026-11-14 07:07:22  ladder_practice_t030: its time is up
+2026-11-14 07:07:32  ladder practice 0.3: 44 trips, 22 min, 0.05 crashes/min, speed mean 1.27 max 4.51 m/s, > 2 m/s 13 %, > 3 m/s 1 %
+2026-11-14 07:07:38  sim: closed
+2026-11-14 07:07:38  ladder night: ALL DONE

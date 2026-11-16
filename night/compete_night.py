@@ -33,9 +33,12 @@ PY = os.path.join(BC, "venv", "Scripts", "python.exe")
 HERE = os.path.join(BC, "night")
 SIM = "AutoDRIVE Simulator.exe"
 TRACK = "compete"
-MODEL = "wm2_self2"
+MODEL = os.environ.get("NIGHTC_MODEL", "wm2_self2")                 # 12 Nov: wm2_c1 with NIGHTC_COST=...,W_CENTER=0
+TEST_TAG = os.environ.get("NIGHTC_TEST_TAG", "self2_test")          # the tests: drive_<track>_<tag>_{a,b}.csv
+SELF_NAME = os.environ.get("NIGHTC_SELF_DIR", f"data/self_{TRACK}")  # another driver or cost -> another folder
+SELF_TAG = os.environ.get("NIGHTC_SELF_TAG", "self")                 # in the names of the self-driving logs
 RANDOM_DIR = os.path.join(BC, "data", f"fast_{TRACK}")
-SELF_DIR = os.path.join(BC, "data", f"self_{TRACK}")
+SELF_DIR = os.path.join(BC, *SELF_NAME.split("/"))
 
 RANDOM_HOURS = float(os.environ.get("NIGHTC_RANDOM_HOURS", "3"))
 SELF_HOURS = float(os.environ.get("NIGHTC_SELF_HOURS", "3"))
@@ -108,11 +111,14 @@ def problem_of(process: subprocess.Popen, phase: Phase, moved: bool, quiet: floa
     return None
 
 
-def run_phase(phase: Phase) -> bool:
+def run_phase(phase: Phase, after_start: Callable[[], None] | None = None) -> bool:
     # one phase with restarts -> False when the sim was closed (then the night ends)
+    # after_start (14 Nov): called once when the first driver listens, e.g. open the sim and click "Connect"
     say(f"{phase.name}: start, at most {phase.seconds / 60:.0f} min")
     began, n, sim_open = time.time(), 1, True
     process = start(phase, n)
+    if after_start is not None:
+        after_start()
     last, last_change, moved = phase.progress(), time.time(), False
     while True:
         time.sleep(CHECK_EVERY)
@@ -171,12 +177,12 @@ def driven_seconds(path: str) -> float:
 
 
 def test_log(letter: str) -> str:
-    return os.path.join(BC, "runs", MODEL, f"drive_{TRACK}_self2_test_{letter}.csv")
+    return os.path.join(BC, "runs", MODEL, f"drive_{TRACK}_{TEST_TAG}_{letter}.csv")
 
 
 def test_phase(letter: str) -> Phase:
     path = test_log(letter)
-    return Phase(name=f"test_{letter}", command=lambda n: ["wm2.drive", MODEL, TEST_GAS, f"self2_test_{letter}"],
+    return Phase(name=f"test_{letter}", command=lambda n: ["wm2.drive", MODEL, TEST_GAS, f"{TEST_TAG}_{letter}"],
                  env=DRIVER_ENV, seconds=TEST_SECONDS + CONNECT_TIMEOUT + 300,
                  progress=lambda: size_of(path), stall=STALL_DRIVE, done=lambda: driven_seconds(path) >= TEST_SECONDS)
 
@@ -187,10 +193,10 @@ def random_phase(hours: float) -> Phase:
 
 
 def self_phase(hours: float) -> Phase:
-    logs = os.path.join(BC, "runs", MODEL, f"drive_{TRACK}_self_*.csv")
-    env = {**DRIVER_ENV, "WM2_EXPLORE_GAS": EXPLORE_GAS, "WM2_SELF_DIR": f"data/self_{TRACK}"}
+    logs = os.path.join(BC, "runs", MODEL, f"drive_{TRACK}_{SELF_TAG}_*.csv")
+    env = {**DRIVER_ENV, "WM2_EXPLORE_GAS": EXPLORE_GAS, "WM2_SELF_DIR": SELF_NAME}
     top = EXPLORE_GAS.split(",")[-1]
-    return Phase(name="self", command=lambda n: ["wm2.drive", MODEL, top, f"self_{NIGHT}_{n}", "explore"], env=env,
+    return Phase(name="self", command=lambda n: ["wm2.drive", MODEL, top, f"{SELF_TAG}_{NIGHT}_{n}", "explore"], env=env,
                  seconds=hours * 3600, progress=lambda: size_of(logs), stall=STALL_DRIVE)
 
 
@@ -240,7 +246,8 @@ def wrong_sim() -> str | None:
 
 
 def main() -> None:
-    say(f"night: {TRACK}, tests 2 x {TEST_SECONDS} s, random {RANDOM_HOURS} h, self {SELF_HOURS} h, driver {DRIVER_ENV}")
+    say(f"night: {TRACK}, tests 2 x {TEST_SECONDS} s, random {RANDOM_HOURS} h, self {SELF_HOURS} h, driver {DRIVER_ENV}"
+        + ("" if MODEL == "wm2_self2" else f", model {MODEL}, self trips -> {SELF_NAME}"))
     reason = wrong_sim()
     if reason is not None:
         say(f"night: NOT STARTED, {reason}")
@@ -258,7 +265,8 @@ def main() -> None:
         if reason is not None:
             say(f"self: skipped ({reason}) -> its {self_hours} h go to random")
             random_hours, self_hours = random_hours + self_hours, 0.0
-        sim_open = run_phase(random_phase(random_hours))
+        if random_hours > 0:
+            sim_open = run_phase(random_phase(random_hours))
         if sim_open and self_hours > 0:
             sim_open = run_phase(self_phase(self_hours))
     close_sim()

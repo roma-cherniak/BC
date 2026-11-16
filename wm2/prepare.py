@@ -41,6 +41,14 @@ SETS = {
 # part, so a list that does not exist is left out.
 SETS["c1"] = ("data/wm2_c1", {s: SETS["self2"][1][s] + [p for p in (f"data/fastc_{s}.txt", f"data/selfc_{s}.txt")
                                                         if os.path.exists(p)] for s in ["train", "val", "test"]})
+# 2026-11-12: + the compete trips wm2_c1 drove itself after the cost and look-ahead changes of E15 - E17:
+# "selfc2" = data/self2_compete (centre term off, 30 min), "selfc3" = data/self3_compete (capped centre term,
+# 1.5 s look-ahead, the first trips with whole laps)
+# + "selfc4" - "selfc6" = data/self4_compete - self6_compete: the three 10 min rounds with the value head (E20)
+SETS["c2"] = ("data/wm2_c2", {s: SETS["c1"][1][s] + [p for p in (f"data/selfc{n}_{s}.txt" for n in range(2, 7))
+                                                     if os.path.exists(p)] for s in ["train", "val", "test"]})
+# 2026-11-14: the same trips as c2, stored with track + source per moment (A1 + A2 of docs/data_solve.md, wm2_c4)
+SETS["c4"] = ("data/wm2_c4", SETS["c2"][1])
 MAX_STEER_RAD = 0.5236      # rad, full steering of the AutoDRIVE car (30 degrees): wheel angle -> -1 .. 1
 DANGER_STEPS = 10           # 10 x 0.05 s = 0.5 s, the same window as checks/check_planner
 GAP = 0.3                   # s: rows further apart than this are two pieces of the trip (the game paused sending:
@@ -54,6 +62,7 @@ def trip_rows(path, number):
         action = np.stack([f["throttle"] / THROTTLE_MAX, f["steering"]], axis=1)
         position, yaw = f["position"].astype(float), f["orientation"].astype(float)
         mode, time, crashed = f["mode"], f["time"], str(f["reason"]) == "crash"
+        track = str(f["track"]) if "track" in f.files else "practice"
 
     n = len(lidar)
     step = np.diff(position, axis=0)
@@ -72,7 +81,10 @@ def trip_rows(path, number):
 
     return {"lidar": lidar, "state": state.astype(np.float32), "action": action.astype(np.float32),
             "trip": (number + piece).astype(np.int32), "progress": progress, "danger": danger.astype(np.uint8),
-            "mode": mode.astype("U7"), "time": time.astype(np.float32)}
+            "mode": mode.astype("U7"), "time": time.astype(np.float32),
+            # 2026-11-14 (A1 of docs/data_solve.md): where each moment comes from, for the balanced sampling
+            "track": np.full(n, track[:8], dtype="U8"),
+            "source": np.full(n, os.path.basename(os.path.dirname(os.path.abspath(path)))[:16], dtype="U16")}
 
 
 def prepare(out_dir, split, lists):

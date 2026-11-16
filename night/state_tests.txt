@@ -1,0 +1,165 @@
+2026-11-12 01:52:51  c1_test_a: start (wm2_c1 on compete, gas 0.12, 330 s)
+2026-11-12 01:58:33  c1_test_a: finished, 333 s
+2026-11-12 01:58:39  c1_test_b: start (wm2_c1 on compete, gas 0.12, 330 s)
+2026-11-12 02:04:16  c1_test_b: finished, 330 s
+2026-11-12 02:04:21  tests: ALL DONE
+2026-11-12 02:11:38  c1_test_a: start (wm2_c1 on practice, gas 0.12, 330 s)
+2026-11-12 02:17:16  c1_test_a: finished, 332 s
+2026-11-12 02:17:21  c1_test_b: start (wm2_c1 on practice, gas 0.12, 330 s)
+2026-11-12 02:22:58  c1_test_b: finished, 332 s
+2026-11-12 02:23:04  tests: ALL DONE
+2026-11-12 02:32:51  c1_center0: start (wm2_c1 on compete, gas 0.12, 120 s, cost FRONT_BASE=0.25,W_CENTER=0)
+2026-11-12 02:37:52  c1_center0: finished, 123 s
+2026-11-12 02:37:57  tests: ALL DONE
+2026-11-12 02:38:17  c1_c01: start (wm2_c1 on compete, gas 0.12, 120 s, cost FRONT_BASE=0.25,W_CENTER=0.1)
+2026-11-12 02:40:27  c1_c01: finished, 125 s
+2026-11-12 02:40:33  tests: ALL DONE
+2026-11-12 02:40:33  c1_c0_f015: start (wm2_c1 on compete, gas 0.12, 120 s, cost FRONT_BASE=0.15,W_CENTER=0)
+2026-11-12 02:42:44  c1_c0_f015: finished, 124 s
+2026-11-12 02:42:49  tests: ALL DONE
+2026-11-12 02:42:49  c1_c0_d8: start (wm2_c1 on compete, gas 0.12, 120 s, cost FRONT_BASE=0.25,W_CENTER=0,DECEL=8)
+2026-11-12 02:45:00  c1_c0_d8: finished, 124 s
+2026-11-12 02:45:05  tests: ALL DONE
+2026-11-12 02:45:06  c1_c0_s025: start (wm2_c1 on compete, gas 0.12, 120 s, cost FRONT_BASE=0.25,W_CENTER=0,SIDE_MARGIN=0.25)
+2026-11-12 02:47:16  c1_c0_s025: finished, 124 s
+2026-11-12 02:47:22  tests: ALL DONE
+2026-11-12 02:48:39  c1_c0_test_a: start (wm2_c1 on practice, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=0)
+2026-11-12 02:54:17  c1_c0_test_a: finished, 333 s
+2026-11-12 02:54:22  c1_c0_test_b: start (wm2_c1 on practice, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=0)
+2026-11-12 03:00:00  c1_c0_test_b: finished, 332 s
+2026-11-12 03:00:05  tests: ALL DONE
+2026-11-12 03:00:22  c1_c0_s045: start (wm2_c1 on practice, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=0,SIDE_MARGIN=0.45)
+2026-11-12 03:03:48  c1_c0_s045: finished, 201 s
+2026-11-12 03:03:53  tests: ALL DONE
+2026-11-12 03:03:54  c1_c0_s055: start (wm2_c1 on practice, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=0,SIDE_MARGIN=0.55)
+2026-11-12 03:07:20  c1_c0_s055: finished, 201 s
+2026-11-12 03:07:25  tests: ALL DONE
+2026-11-12 03:08:03  c1_c0_s045: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=0,SIDE_MARGIN=0.45)
+2026-11-12 03:11:29  c1_c0_s045: finished, 200 s
+2026-11-12 03:11:34  tests: ALL DONE
+2026-11-12 03:11:35  c1_c0_s05: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=0,SIDE_MARGIN=0.5)
+2026-11-12 03:15:06  c1_c0_s05: finished, 205 s
+2026-11-12 03:15:11  tests: ALL DONE
+2026-11-12 03:15:13  c1_c0_s055: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=0,SIDE_MARGIN=0.55)
+2026-11-12 03:18:39  c1_c0_s055: finished, 200 s
+2026-11-12 03:18:44  tests: ALL DONE
+2026-11-12 04:02:35  c1_cc05: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=0.3,CENTER_CLAMP=0.5)
+2026-11-12 04:06:01  c1_cc05: finished, 201 s
+2026-11-12 04:06:06  tests: ALL DONE
+2026-11-12 04:06:07  c1_cc10: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=0.3,CENTER_CLAMP=1.0)
+2026-11-12 04:09:33  c1_cc10: finished, 201 s
+2026-11-12 04:09:38  tests: ALL DONE
+2026-11-12 04:09:39  c1_w1cc03: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3)
+2026-11-12 04:13:10  c1_w1cc03: finished, 204 s
+2026-11-12 04:13:16  tests: ALL DONE
+2026-11-12 04:13:33  c1_w1cc02: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.2)
+2026-11-12 04:17:00  c1_w1cc02: finished, 201 s
+2026-11-12 04:17:05  tests: ALL DONE
+2026-11-12 04:17:06  c1_w03cc03: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=0.3,CENTER_CLAMP=0.3)
+2026-11-12 04:20:32  c1_w03cc03: finished, 200 s
+2026-11-12 04:20:37  tests: ALL DONE
+2026-11-12 04:20:37  c1_w2cc015: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=2.0,CENTER_CLAMP=0.15)
+2026-11-12 04:24:04  c1_w2cc015: finished, 200 s
+2026-11-12 04:24:09  tests: ALL DONE
+2026-11-12 04:24:40  c1_h30_w1cc03: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3)
+2026-11-12 04:28:11  c1_h30_w1cc03: finished, 205 s
+2026-11-12 04:28:16  tests: ALL DONE
+2026-11-12 04:28:17  c1_h40_w1cc03: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3)
+2026-11-12 04:31:48  c1_h40_w1cc03: finished, 203 s
+2026-11-12 04:31:53  tests: ALL DONE
+2026-11-12 04:31:54  c1_h20_w1cc03_b: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3)
+2026-11-12 04:35:25  c1_h20_w1cc03_b: finished, 205 s
+2026-11-12 04:35:30  tests: ALL DONE
+2026-11-12 04:35:52  c1_h30_test_a: start (wm2_c1 on compete, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3)
+2026-11-12 04:41:29  c1_h30_test_a: finished, 331 s
+2026-11-12 04:41:34  c1_h30_test_b: start (wm2_c1 on compete, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3)
+2026-11-12 04:47:11  c1_h30_test_b: finished, 331 s
+2026-11-12 04:47:16  tests: ALL DONE
+2026-11-12 04:47:41  c1_h30_test_a: start (wm2_c1 on practice, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3)
+2026-11-12 04:53:18  c1_h30_test_a: finished, 332 s
+2026-11-12 04:53:24  c1_h30_test_b: start (wm2_c1 on practice, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3)
+2026-11-12 04:59:01  c1_h30_test_b: finished, 330 s
+2026-11-12 04:59:07  tests: ALL DONE
+2026-11-12 10:31:00  c1_free03: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_FREE=0.3)
+2026-11-12 12:42:00  c1_fr03: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_FREE=0.3)
+2026-11-12 12:47:06  c1_fr03: finished, 200 s
+2026-11-12 12:47:11  tests: ALL DONE
+2026-11-12 12:47:13  c1_fr06: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_FREE=0.6)
+2026-11-12 12:50:44  c1_fr06: finished, 205 s
+2026-11-12 12:50:49  tests: ALL DONE
+2026-11-12 12:50:51  c1_h30_fr03: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_FREE=0.3)
+2026-11-12 12:54:17  c1_h30_fr03: finished, 200 s
+2026-11-12 12:54:22  tests: ALL DONE
+2026-11-12 13:07:19  c1_val1: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=1.0)
+2026-11-12 13:10:45  c1_val1: finished, 201 s
+2026-11-12 13:10:50  tests: ALL DONE
+2026-11-12 13:10:51  c1_h30_val1: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=1.0)
+2026-11-12 13:14:22  c1_h30_val1: finished, 204 s
+2026-11-12 13:14:27  tests: ALL DONE
+2026-11-12 13:35:49  c1_v1_w10: start (wm2_c1 on compete, gas 0.12, 160 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=1.0)
+2026-11-12 13:38:35  c1_v1_w10: finished, 160 s
+2026-11-12 13:38:40  tests: ALL DONE
+2026-11-12 13:38:41  c1_v1_w05: start (wm2_c1 on compete, gas 0.12, 160 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=0.5)
+2026-11-12 13:41:26  c1_v1_w05: finished, 160 s
+2026-11-12 13:41:32  tests: ALL DONE
+2026-11-12 13:41:32  c1_v1_h30_w05: start (wm2_c1 on compete, gas 0.12, 160 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=0.5)
+2026-11-12 13:44:23  c1_v1_h30_w05: finished, 163 s
+2026-11-12 13:44:28  tests: ALL DONE
+2026-11-12 13:58:35  c1_v2_w05: start (wm2_c1 on compete, gas 0.12, 160 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=0.5)
+2026-11-12 14:01:20  c1_v2_w05: finished, 160 s
+2026-11-12 14:01:26  tests: ALL DONE
+2026-11-12 14:01:26  c1_v2b_w05: start (wm2_c1 on compete, gas 0.12, 160 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=0.5)
+2026-11-12 14:04:13  c1_v2b_w05: finished, 161 s
+2026-11-12 14:04:18  tests: ALL DONE
+2026-11-12 14:04:18  c1_v2b_h30_w05: start (wm2_c1 on compete, gas 0.12, 160 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=0.5)
+2026-11-12 14:07:09  c1_v2b_h30_w05: finished, 164 s
+2026-11-12 14:07:14  tests: ALL DONE
+2026-11-12 14:07:15  c1_v2b_w10: start (wm2_c1 on compete, gas 0.12, 160 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=1.0)
+2026-11-12 14:10:06  c1_v2b_w10: finished, 164 s
+2026-11-12 14:10:11  tests: ALL DONE
+2026-11-12 14:22:56  c1_v3b_w10: start (wm2_c1 on practice, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=1.0)
+2026-11-12 14:26:22  c1_v3b_w10: finished, 201 s
+2026-11-12 14:26:28  tests: ALL DONE
+2026-11-12 14:27:06  c1_v3b_w05: start (wm2_c1 on practice, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=0.5)
+2026-11-12 14:30:34  c1_v3b_w05: finished, 201 s
+2026-11-12 14:30:39  tests: ALL DONE
+2026-11-12 14:30:40  c1_v3b_w03: start (wm2_c1 on practice, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=0.3)
+2026-11-12 14:34:11  c1_v3b_w03: finished, 204 s
+2026-11-12 14:34:16  tests: ALL DONE
+2026-11-12 14:34:41  c1_v3b_w05: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=0.5)
+2026-11-12 14:38:12  c1_v3b_w05: finished, 206 s
+2026-11-12 14:38:17  tests: ALL DONE
+2026-11-12 14:38:18  c1_v3b_w03: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=0.3)
+2026-11-12 14:41:49  c1_v3b_w03: finished, 205 s
+2026-11-12 14:41:54  tests: ALL DONE
+2026-11-12 14:41:55  c1_v3b_w10: start (wm2_c1 on compete, gas 0.12, 200 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,W_VALUE=1.0)
+2026-11-12 14:45:21  c1_v3b_w10: finished, 201 s
+2026-11-12 14:45:26  tests: ALL DONE
+2026-11-12 14:45:45  c1_v3b_w03_s045: start (wm2_c1 on compete, gas 0.12, 190 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,SIDE_MARGIN=0.45,W_VALUE=0.3)
+2026-11-12 14:49:02  c1_v3b_w03_s045: finished, 190 s
+2026-11-12 14:49:07  tests: ALL DONE
+2026-11-12 14:49:07  c1_v3b_w10_s045: start (wm2_c1 on compete, gas 0.12, 190 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,SIDE_MARGIN=0.45,W_VALUE=1.0)
+2026-11-12 14:52:29  c1_v3b_w10_s045: finished, 195 s
+2026-11-12 14:52:34  tests: ALL DONE
+2026-11-12 14:52:52  c1_final_w10: start (wm2_c1 on compete, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,SIDE_MARGIN=0.45,W_VALUE=1.0)
+2026-11-12 14:58:29  c1_final_w10: finished, 331 s
+2026-11-12 14:58:34  tests: ALL DONE
+2026-11-12 14:58:35  c1_final_w03: start (wm2_c1 on compete, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,SIDE_MARGIN=0.45,W_VALUE=0.3)
+2026-11-12 15:04:12  c1_final_w03: finished, 331 s
+2026-11-12 15:04:17  tests: ALL DONE
+2026-11-12 15:04:42  c1_final_w10: start (wm2_c1 on practice, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,SIDE_MARGIN=0.45,W_VALUE=1.0)
+2026-11-12 15:10:19  c1_final_w10: finished, 332 s
+2026-11-12 15:10:24  tests: ALL DONE
+2026-11-12 15:10:25  c1_final_w03: start (wm2_c1 on practice, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,SIDE_MARGIN=0.45,W_VALUE=0.3)
+2026-11-12 15:16:03  c1_final_w03: finished, 332 s
+2026-11-12 15:16:08  tests: ALL DONE
+2026-11-12 16:48:08  c2_test_a: start (wm2_c2 on compete, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,SIDE_MARGIN=0.45,W_VALUE=0.3)
+2026-11-12 16:53:46  c2_test_a: finished, 332 s
+2026-11-12 16:53:51  c2_test_b: start (wm2_c2 on compete, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,SIDE_MARGIN=0.45,W_VALUE=0.3)
+2026-11-12 16:59:28  c2_test_b: finished, 331 s
+2026-11-12 16:59:33  tests: ALL DONE
+2026-11-12 16:59:58  c2_test_a: start (wm2_c2 on practice, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,SIDE_MARGIN=0.45,W_VALUE=0.3)
+2026-11-12 17:05:36  c2_test_a: finished, 334 s
+2026-11-12 17:05:41  c2_test_b: start (wm2_c2 on practice, gas 0.12, 330 s, cost FRONT_BASE=0.25,W_CENTER=1.0,CENTER_CLAMP=0.3,SIDE_MARGIN=0.45,W_VALUE=0.3)
+2026-11-12 17:11:19  c2_test_b: finished, 332 s
+2026-11-12 17:11:24  tests: ALL DONE

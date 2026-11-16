@@ -23,7 +23,14 @@ one action-code layer or one predictor layer. Faster than a plain port:
   - the action codes (AdaLN) are cached per distinct action; the encoder runs only for the frames of a new plan
 
 Versions: v11 first wm2 port (DNF 270 ms: encoder every call), v12 generator, v13 layer-sized pieces (run #1223: no
-DNF, but steering always 0 -> wall), v14 W_SWITCH scaled to the plan length + real-lidar reflex.
+DNF, but steering always 0 -> wall), v14 W_SWITCH scaled to the plan length + real-lidar reflex, v15 - v17 braking,
+the track map and its guards (kept as ail_cup/claude_controller_v17.py), v18 (12 Nov 2026) the cost of the sim
+driver after E15 - E21: capped centre term, side margin 0.45 m, and the value head at the end of every option
+(model file from `python -m ail_cup.export_wm2 wm2_c2` -> wm2_c2_value_garage.npz, 56 arrays; kept as
+ail_cup/claude_controller_v18.py; run #1258 finished the oval in 68.8 s, but driven by the reflex), v19 the reflex
+only as an emergency (0.4 m to the side, 0.6 m ahead) so that the world model steers the lap (kept as
+ail_cup/claude_controller_v19.py; run #1259: the model chose the right side but full lock for 0.75 s swung the car
+into the wall), v20 the steering changes in steps of 0.25 (7.5 degrees) per plan instead of full lock.
 
 Safe start: anything missing in init (car, lidar, model) gets a default and is printed. Without the network the
 car drives by the simple rule, so a run still shows the prints.
@@ -32,9 +39,9 @@ import math
 import operator
 import time
 
-VERSION = "claude_controller v17 (wm2, 3x10 plan, reflexes, track map: forward guard)"
+VERSION = "claude_controller v20 (wm2, 3x10 plan, value head, emergency reflex, steering in steps of 0.25)"
 # status line: t time, mode (brain / RESCUE / REFLEX / TRACK / TURN), s steering (+ = left),
-#              [option costs: right, straight, left], v speed, F R L real walls (m),
+#              [option costs: a step more right, as now, a step more left], v speed, F R L real walls (m),
 #              e degrees to the track's forward direction (+ = left),
 #              p plans done / calls since the last decision, w closest imagined wall (m), slowest call, prog
 BEAMS = 109                     # the beams wm2 knows: -135..+135 degrees, 2.5 degrees apart, right -> left
@@ -46,7 +53,12 @@ GAS_PER_MS = 1 / 24.5           # AutoDRIVE throttle per m/s of steady speed (0.
 HISTORY, WIDTH, HEADS, LAYERS = 4, 128, 4, 4
 
 SPEED = 1.2                     # m/s, the command speed (the plan imagines driving at it)
-OPTIONS = [-0.8, 0.0, 0.8]      # steering options in model units; 0.8 x 30 deg = 24 deg = the AIL Cup maximum
+STEER_MAX = 0.8                 # model units; 0.8 x 30 deg = 24 deg = the AIL Cup maximum
+STEER_STEP = 0.25               # v20: every plan compares "a bit more right", "as now", "a bit more left": the
+                                # steering decided last -+ STEER_STEP (7.5 degrees). Until v19 the options were full
+                                # right / straight / full left, held ~0.75 s until the next plan: run #1259 (v19, the
+                                # oval) chose "left" rightly at 4.0 s and swung from 21 deg right of the track to 77 deg
+                                # left of it within a second (full lock at 1.2 m/s turns ~90 deg per second)
 STEPS = 10                      # imagined steps of 0.05 s per option (0.5 s, ~0.6 m). v14 had 5 options x 4 steps: their
                                 # costs differed by ~0.01 (run #1224: -0.17 -0.22 -0.28 -0.27 -0.24), 0.2 s of
                                 # imagination cannot tell left from straight -> fewer options, longer look
@@ -59,17 +71,29 @@ CALL_BUDGET = 0.09              # s for the WHOLE call; the Garage cap is 250 ms
 HARD_LIMIT = 0.12               # s: the first piece of a call may start while a call stays below this
 FRONT_BASE = 0.4                # m kept in front even when slow ...
 DECEL = 4.0                     # ... plus the braking distance v^2 / (2 DECEL)
-SIDE_MARGIN = 0.35              # m to the side walls and diagonals
-W_WALL, W_CENTER = 20.0, 0.3   # cost weights per imagined step, as the sim driver wm2/drive.py
+SIDE_MARGIN = 0.45              # m to the side walls and diagonals (v18: 0.35 before)
+W_WALL, W_CENTER = 20.0, 1.0   # cost weights per imagined step (v18: W_CENTER 0.3 before, but uncapped)
+CENTER_CLAMP = 0.3              # m: |left - right| in the centre term counts up to this (v18; 2.0 before). In a wide
+                                # turn the uncapped term made every turning plan dearer than going straight
+                                # (sim, 12 Nov 2026: the car stopped at the first corner of the compete track)
+W_VALUE = 0.3 * STEPS / 20      # per metre the value head expects the car to still drive in the 3 s AFTER the plan
+                                # (v18; the sim driver's 0.3 belongs to 20-step plans, like W_SWITCH below). Only
+                                # used when the model file has the value head (val_* arrays)
+VALUE_STEPS = 3                 # the value is read on the last VALUE_STEPS imagined moments (mean), kept in 0..VALUE_CAP
+VALUE_CAP = 6.0                 # m
 W_SWITCH = 0.3 * STEPS / 20     # per unit of steering change, once per plan: drive.py's 0.3 belongs to 20-step plans.
                                 # Unscaled (v13, run #1223) it outweighed everything a 4-step plan could gain: the
                                 # brain kept steering 0 while the road turned left and drove into the right wall
-REFLEX_M = 0.7                  # m: a real side / diagonal wall closer than this -> the simple rule steers at once
+REFLEX_M = 0.4                  # m: a real side / diagonal wall closer than this -> the simple rule steers at once.
+                                # v19: 0.7 before. Run #1258 (v18, the oval): the simple rule steers into the deepest
+                                # opening = along the inner wall, 0.35 - 0.6 m from it, so with 0.7 it never gave the
+                                # wheel back: every status line of the last 20 s was REFLEX, the brain drove nothing
 RESCUE_M = 0.25                 # m: if the best imagined path comes closer than this to a wall, the simple rule steers
 SAFE_FRONT = 1.6                # m: closer in front -> slow down linearly ...
 STOP_FRONT = 0.35               # m: ... to MIN_SPEED at this distance
 MIN_SPEED = 0.3                 # m/s
-FRONT_REFLEX_M = 1.0            # m: a real wall ahead (+-10 deg) closer than this -> the simple rule steers at once
+FRONT_REFLEX_M = 0.6            # m: a real wall ahead (+-10 deg) closer than this -> the simple rule steers at once
+                                # (v19: 1.0 before; the speed still falls from SAFE_FRONT on)
 LOOKAHEAD = 1.5                 # m along the track's centerline: "forward" = the direction to that point
 TRACK_SEARCH = 30               # centerline points around the last one searched for the nearest (~6 m each way)
 CONE_DEG = 60                   # degrees: the simple rule looks for openings only this far from "forward"
@@ -162,11 +186,13 @@ class Controller:
         except Exception as error:
             print("INIT: no track map, no wrong-way guard:", repr(error))
         self.w = None                                                        # None = no network: simple rule
+        self.has_value = False
         model = pick(init, "model", None)
         if model is not None:
             try:                                                             # a bad model must not stop the run
                 self.unpack(model)                                           # not "load": the Garage forbids that name
-                print(f"INIT: wm2 loaded, MODEL = {self.model_name}, controller = {VERSION}")
+                print(f"INIT: wm2 loaded, MODEL = {self.model_name}, value head = {self.has_value}, "
+                      f"controller = {VERSION}")
             except Exception as error:
                 self.w = None
                 print("INIT: wm2 NOT loaded, driving by the simple rule:", repr(error))
@@ -176,6 +202,7 @@ class Controller:
         self.moment_s = 0.0                                                  # s, how long one paused piece took
         self.slowest_ms = 0.0                                                # the slowest call since the last print
         self.last_costs = []                                                 # the option costs of the last plan
+        self.last_options = []                                               # ... and their steerings (model units)
         self.mode = "brain "
         self.previous = 0.0                                                  # the steering decided last (model units)
         self.rescue = False
@@ -194,6 +221,10 @@ class Controller:
                      "pred_norm", "pred_dz", "pred_speed", "head_b0", "head_b2", "head_out"]:
             w[name] = (get(name + "_w"), get(name + "_b"))
         w["pred_pos"] = get("pred_pos")
+        self.has_value = all(f"val_{part}_w" in model for part in ["b0", "b2", "out"])   # v18: optional
+        if self.has_value:
+            for part in ["b0", "b2", "out"]:
+                w[f"val_{part}"] = (get(f"val_{part}_w"), get(f"val_{part}_b"))
         stacked = {part: (get(f"pred_{part}_w"), get(f"pred_{part}_b"))     # (4 blocks, ...) each, see export_wm2
                    for part in ["q", "k", "v", "o", "m0", "m2", "ada"]}
         w["layers"] = [{part: (weight[l], bias[l]) for part, (weight, bias) in stacked.items()} for l in range(LAYERS)]
@@ -302,6 +333,11 @@ class Controller:
         out = lin(h, *self.w["head_out"])
         return out[:13], out[14]
 
+    def value(self, z):
+        # z -> metres the car is expected to still drive in the next 3 s (wm2/value.py)
+        h = gelu(lin(gelu(lin(z, *self.w["val_b0"])), *self.w["val_b2"]))
+        return lin(h, *self.w["val_out"])[0]
+
     # ----- the planner: a generator, paused after every predictor moment ------------------------------------------
     def think(self, frames, past, steer_now):
         # One whole plan. "yield" = pause here; the next call goes on from exactly this point (step() calls next()
@@ -324,7 +360,12 @@ class Controller:
                 yield
             shared[s] = kv
         costs, walls_min = [], []
-        for steer in OPTIONS:
+        # around the REAL wheel angle (to 0.05), not the brain's last choice: after the reflex or the track guard
+        # steered, the brain goes on from where the wheels are
+        now = round(steer_now * 20) / 20
+        options = sorted({max(-STEER_MAX, min(STEER_MAX, round(now + d, 3)))
+                          for d in (-STEER_STEP, 0.0, STEER_STEP)})          # 2 options at full lock
+        for steer in options:
             action, imagined, cost, closest = [gas, steer], [], 0.0, math.inf
             for s in range(STEPS):
                 base = shared.get(s)
@@ -344,14 +385,19 @@ class Controller:
                 side = min(walls[:5] + walls[8:])
                 front_short = max(0.0, FRONT_BASE + v * v / (2 * DECEL) - front)
                 side_short = max(0.0, SIDE_MARGIN - side)
-                center = max(-2.0, min(2.0, walls[12] - walls[0])) ** 2
+                center = max(-CENTER_CLAMP, min(CENTER_CLAMP, walls[12] - walls[0])) ** 2
                 cost += -progress + W_WALL * (front_short ** 2 + side_short ** 2) + W_CENTER * center
                 closest = min(closest, front, side)
+                yield
+            if self.has_value:                                               # where does this option END? (v18)
+                ahead = sum(self.value(z) for z in imagined[-VALUE_STEPS:]) / VALUE_STEPS
+                cost -= W_VALUE * max(0.0, min(VALUE_CAP, ahead))
                 yield
             costs.append(cost + W_SWITCH * abs(steer - steer_now))
             walls_min.append(closest)
         best = costs.index(min(costs))                                       # the plan is done: decide
-        self.previous = OPTIONS[best]
+        self.previous = options[best]
+        self.last_options = options
         self.best_cost, self.best_wall = costs[best], walls_min[best]
         self.last_costs = costs
         self.rescue = self.best_wall < RESCUE_M

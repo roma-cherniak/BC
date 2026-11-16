@@ -1,0 +1,2 @@
+data/self6_compete\drive_0017.npz
+data/self6_compete\drive_0013.npz

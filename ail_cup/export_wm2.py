@@ -68,10 +68,22 @@ def main(run):
         put(f"head_{dst}_w", heads[f"{src}.weight"])
         put(f"head_{dst}_b", heads[f"{src}.bias"])
 
+    # the value head (wm2/value.py, 12 Nov 2026): "metres the car still drives in the next 3 s". Optional: without
+    # runs/<run>/value.pt the file is as before and the controller plans without it. 6 more arrays (56 of 64).
+    value_path = Path(RUNS_DIR) / run / "value.pt"
+    if value_path.exists():
+        value = torch.load(value_path, map_location="cpu")
+        for src, dst in [("body.0", "b0"), ("body.2", "b2"), ("body.4", "out")]:
+            put(f"val_{dst}_w", value[f"{src}.weight"])
+            put(f"val_{dst}_b", value[f"{src}.bias"])
+
     # which model this is, inside the file (numbers only: letter codes, the Garage takes plain numeric arrays):
     # the controller prints it, so a Garage run shows what drove
-    label = f"{run} exported {datetime.date.today()}"
-    path = Path(__file__).parent / f"{run}_garage.npz"
+    with_value = "val_out_w" in out
+    label = f"{run}{' + value' if with_value else ''} exported {datetime.date.today()}"
+    path = Path(__file__).parent / f"{run}{'_value' if with_value else ''}_garage.npz"
+    if path.exists():
+        sys.exit(f"{path} already exists: nothing is overwritten")
     arrays = {k: v.astype(DTYPE) for k, v in out.items()}
     arrays["meta_name"] = np.array([ord(c) for c in label], dtype=np.int16)
     np.savez(path, **arrays)

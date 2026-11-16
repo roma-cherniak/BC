@@ -37,7 +37,18 @@ Today only offline checks, the sim is busy.
 1. **Which project is active?** `BP/CLAUDE.md` says `autodrive-lewm/`, but the current work is in `BC/` (wm2). Should I treat `BC` as the main project?
    - Your answer: BC
 2. **How should I keep the goal files?** Should I tick off finished tasks and write tomorrow's `day.md` myself, or only when you ask?
-   - Your answer: 
+   - Your answer: yes
+12. **(13 Nov) Does the AIL Cup Garage allow numpy?** `ail_cup/make_controller.py` and `BP/CHAT_CONTEXT.md` (7 Nov) say
+    "the platform allows only numpy and the standard library", but every controller since v10 is pure Python, and no file
+    says why. With numpy, the simple pipeline (encode → N imagined options → choose the best → return) could fit in one call
+    (~10 – 50 ms, my estimate, not measured); without it, one plan is 1.18 s and has to be spread over ~15 calls (E22).
+   - Your answer (14 Nov, in the chat): yes, "ride on AIL Cup tracks with numpy".
+13. **(13 Nov) Which data variants first?** The dataset analysis of 13 Nov (in the chat) found these gaps: no frames above
+    ~2 m/s, each track driven in one direction only, compete is 1/6 of the data, self-driven trips see each place from
+    1.5 – 2.5 headings of 8, `clean_practice` (791 min) is unused. Variants: A = training-only fixes (re-weighting,
+    stopped frames, sensor noise), B = sim collection (reverse direction, speed ladder, starts at crash places, recovery),
+    C = synthetic tracks from `ail_cup/garage_sim.py`. Can the sim start the car facing the other way?
+   - Your answer: yes
 
 ## Decisions (stay valid until changed)
 | Date | Decision |
@@ -53,6 +64,15 @@ Today only offline checks, the sim is busy.
 | 2026-11-11 | `research/` is archived (`archive/research/`); the loop is written new in `autoresearch/`. |
 | 2026-11-11 | The 3 AIL Cup maps: an oval, a winding track, an oval with two chicanes. Pictures in `docs/ail_cup_maps/`. See D17. |
 | 2026-11-11 | `explore` is not a track: data is collected only on `practice` and `compete`. |
+| 2026-11-16 | Baseline frozen: `wm2_c4` + `ail_cup/simple_controller.py` v5. No more hand fixes; week 2 starts Tue 17. |
+| 2026-11-16 | Score = lap time (lower is better), a crash / DNF = a big fixed penalty. |
+| 2026-11-16 | The goal is the **real** AIL Cup (not `garage_sim`). The project is a university project / thesis: the graph and a clear method matter most. |
+| 2026-11-16 | Thesis question: **how can the autoresearch approach help improve a self-driving JEPA model?** |
+| 2026-11-16 | **Loop v1 (the user's design):** the agent edits the controller → test on the **real AIL Cup** through `autoresearch/ailcup_client.py` → log → keep if better. See E36. |
+| 2026-11-16 | Loop v1 edits **only** `simple_controller.py`; the model (retrain + export) joins in phase 2. The judge (`ailcup_client.py`, `score.py`) is frozen. |
+| 2026-11-16 | Score per experiment: **3 tracks (fiit-oval, hairpin-valley, danube-chicane) × 2 laps**, sum of times, DNF = big penalty; keep only if better than the best by more than the noise. |
+| 2026-11-16 | Git: the loop commits kept versions **locally** on a loop branch (`autoresearch/run<N>`); the user pushes when they want. |
+| 2026-11-14 | `compete` is dropped as a goal (one dead-end fork, E31 / E32); the focus is full laps on the AIL Cup maps with the numpy controller (`ail_cup/simple_controller.py`). The Garage allows numpy. See D19. |
 
 ## Archive
 ### Answered 2026-11-11

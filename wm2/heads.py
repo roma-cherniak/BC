@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn
 
 from config import DEVICE, FRONT, FRONT_LEFT, FRONT_RIGHT, LEFT, MAX_RANGE, RIGHT, RUNS_DIR, beams_between
-from wm2.data import load_split, run_data_dir
+from wm2.data import load_split, random_scales, run_data_dir, scale_setting, windows
 from wm2.model import LATENT, Encoder
 
 # two kinds of heads:
@@ -58,6 +58,24 @@ def encode_all(encoder, data):
                           for i in range(0, len(data["lidar"]), CHUNK)])
 
 
+SCALE_SHARE, MIRROR = 0.7, 0.5
+
+
+def augmented(encoder, data, scale_range):
+    # every moment once, as wm2.train shows it: mirrored with probability MIRROR, SCALE_SHARE of them in a bigger or
+    # smaller world -> z, wall answers (from the changed scan itself), danger, progress (x scale), the scales
+    n = len(data["lidar"])
+    scale, mirror = random_scales(n, scale_range, SCALE_SHARE).to(DEVICE), (torch.rand(n) < MIRROR).to(DEVICE)
+    zs, walls = [], []
+    with torch.no_grad():
+        for i in range(0, n, CHUNK):
+            idx = torch.arange(i, min(i + CHUNK, n), device=DEVICE)
+            lidar, state, _ = windows(data, idx, 1, mirror[idx], scale[idx])
+            zs.append(encoder(lidar[:, 0], state[:, 0]))
+            walls.append(torch.stack([lidar[:, 0][:, sector].min(dim=1).values for sector in WALLS], dim=1) * MAX_RANGE)
+    return torch.cat(zs), torch.cat(walls), data["danger"].float(), data["progress"] * scale, scale
+
+
 def load_heads(run, device, kind="walls5"):
     walls, _, file = KINDS[kind]
     heads = Heads(len(walls)).to(device)
@@ -75,13 +93,17 @@ def main(run):
     encoder.eval()
     data_dir = run_data_dir(run)
     train, test = load_split("train", DEVICE, data_dir), load_split("test", DEVICE, data_dir)
-    z, z_t = encode_all(encoder, train), encode_all(encoder, test)
-    (w, d, p), (w_t, d_t, p_t) = targets(train), targets(test)
+    scale_range = scale_setting()                      # WM2_SCALE=0.6,2.2: every epoch sees new scales and mirrors
+    z_t, (w_t, d_t, p_t) = encode_all(encoder, test), targets(test)
+    if scale_range is None:
+        z, (w, d, p) = encode_all(encoder, train), targets(train)
 
     heads = Heads(len(WALLS)).to(DEVICE)
     optimizer = torch.optim.AdamW(heads.parameters(), lr=1e-3, weight_decay=1e-4)
     bce = nn.BCEWithLogitsLoss()
     for epoch in range(EPOCHS):
+        if scale_range is not None:
+            z, w, d, p, _ = augmented(encoder, train, scale_range)
         order = torch.randperm(len(z), device=DEVICE)
         for i in range(0, len(z), BATCH):
             idx = order[i : i + BATCH]

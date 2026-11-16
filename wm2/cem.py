@@ -10,6 +10,8 @@
 #                      + W_DANGER x sum of P(danger)            (danger head)
 #                      + W_SMOOTH x sum of |steering change|
 #                      - W_END    x imagined speed at the END of the plan (terminal value, metres)
+#                      - W_FREE   x metres of free road in front at the END of the plan (up to FREE_CAP)
+#                      - W_VALUE  x metres the car is expected to drive in the 3 s after the plan (value head)
 # The plan sees only 1 s: slowing down costs little progress inside it, but the slow car also loses every second
 # AFTER it. W_END (seconds) counts the end speed as that many more seconds of driving, so "brake and stay slow"
 # is no longer cheap. The front margin (v^2 / 2a at every step, also the last) keeps a fast end speed safe.
@@ -32,6 +34,17 @@ W_WALL = 20.0
 W_DANGER = 0.05
 W_SMOOTH = 0.02
 W_CENTER = 0.0          # x (left wall - right wall)^2 per step: 0 offline; the sim driver sets it (wm2/drive.py)
+CENTER_CLAMP = 2.0      # m: |left - right| counts up to this. 2 = as before. 12 Nov 2026 (E15): in the wide left turn
+                        # of `compete` the uncapped term made every turning plan dearer than stopping
+W_FREE = 0.0            # per metre of free road in front at the END of the plan (0 = off). 12 Nov 2026 (E18): the cost
+FREE_CAP = 4.0          # only punished near walls, so an open pocket beside the track was as good as the road
+FREE_STEPS = 5          # (the U-turn of E17). The free road = the imagined front wall, mean of the last FREE_STEPS
+                        # steps, counted up to FREE_CAP metres: a plan that ends facing a long road beats one that
+                        # ends facing a wall
+W_VALUE = 0.0           # per metre the value head (wm2/value.py) expects the car to still drive in the 3 s AFTER the
+VALUE = None            # plan (0 = off). VALUE: the loaded head; wm2/drive.py sets it when W_VALUE > 0 (E19).
+VALUE_CAP = 6.0         # Read on the last FREE_STEPS imagined steps and kept between 0 and VALUE_CAP metres, because on
+                        # imagined z far from the data the head sometimes answers below 0
 W_END = 0.0             # s: reward for the imagined end speed (0 = off, as before 2026-11-09 evening)
 STD_START = (0.3, 0.6)  # (throttle in model units, steering)
 STD_MIN = 0.05
@@ -55,13 +68,16 @@ def sequence_cost(predictor, heads, z_hist, past_actions, plans, same=0, roll=No
     else:                                           # walls5: front, right, left, front_right, front_left
         front, side = walls[..., 0], walls[..., 1:].min(dim=-1).values
         right, left = walls[..., 1], walls[..., 2]
-    center = ((left - right).clamp(-2, 2)) ** 2     # keep to the middle of the corridor (W_CENTER)
+    center = ((left - right).clamp(-CENTER_CLAMP, CENTER_CLAMP)) ** 2     # keep to the middle of the corridor (W_CENTER)
     front_short = (FRONT_BASE + v ** 2 / (2 * DECEL) - front).clamp(min=0)
     side_short = (SIDE_MARGIN - side).clamp(min=0)
     steer = torch.cat([past_actions[:, -1:, 1], plans[..., 1]], dim=1)
     cost = (-progress.sum(1) + W_WALL * (front_short ** 2 + side_short ** 2).sum(1)
             + W_DANGER * torch.sigmoid(danger).sum(1) + W_SMOOTH * steer.diff(dim=1).abs().sum(1)
-            + W_CENTER * center.sum(1) - W_END * v[:, -1])
+            + W_CENTER * center.sum(1) - W_END * v[:, -1]
+            - W_FREE * front[:, -FREE_STEPS:].mean(1).clamp(0, FREE_CAP))
+    if W_VALUE > 0 and VALUE is not None:
+        cost = cost - W_VALUE * VALUE(z_im[:, -FREE_STEPS:]).mean(1).clamp(0, VALUE_CAP)
     return cost
 
 

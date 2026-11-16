@@ -1,0 +1,2 @@
+simple_controller v5 (numpy, 18 plans x 5 steps, 75 ms budget, no prints while driving)
+INIT: MODEL = wm2_c4 + value exported 2026-11-14, value head = True

@@ -1,0 +1,3 @@
+data/synth_test\drive_00010_0.npz
+data/synth_test\drive_00010_1.npz
+data/synth_test\drive_00010_2.npz

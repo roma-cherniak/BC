@@ -33,6 +33,7 @@ from data_collection import recorder
 from data_collection.packet import read_packet
 from wm2 import cem
 from wm2.heads import load_heads
+from wm2.push import new_push_state, push_steer
 from wm2.model import HISTORY, LATENT, Encoder, GraphRollout, Predictor, rollout
 
 MODEL = sys.argv[1] if len(sys.argv) > 1 else "wm2_k10"
@@ -50,6 +51,9 @@ NOISE_START = 0.015             # chance per 0.05 s frame that a noise event beg
 NOISE_STEER = (0.3, 0.7)        # size of a steering offset (either sign), steering units -1 .. 1
 NOISE_STEER_TIME = (0.2, 0.6)   # s
 NOISE_BRAKE_TIME = (0.15, 0.4)  # s of gas 0
+# 2026-11-14 (B4 of docs/data_solve.md): set WM2_PUSH=1 for recovery pushes in explore mode (wm2/push.py): full lock to
+# one side for 0.3 - 0.8 s every 5 - 15 s, recorded as mode "push". Default off; not driven yet.
+PUSH = os.environ.get("WM2_PUSH") == "1"
 TRIP_MAX = 60.0                 # s: a longer trip is saved and a new one begins (no reset, the car keeps driving)
 # 2026-11-11: the track is a setting, e.g. set WM2_TRACK=compete (with the compete sim open). It names the log
 # (runs/<model>/drive_<track>_<tag>.csv), the "track" field of the recorded trips and their default folder.
@@ -59,7 +63,9 @@ if TRACK not in ("practice", "compete"):
 SELF_DIR = os.environ.get("WM2_SELF_DIR", f"data/self_{TRACK}")     # round C2: data/self2_practice
 DEVICE = "cpu"
 THREADS = 6                     # CPU threads for the planner
-SIZE = dict(samples=32, iters=1, horizon=20, elites=6)   # try 3 (24/2/16) took 0.34 s in the sim -> 8 of 16 steps
+SIZE = dict(samples=32, iters=1, horizon=int(os.environ.get("WM2_HORIZON", "20")), elites=6)
+# horizon: steps of 0.05 s the plan looks ahead (set WM2_HORIZON=30 to try 1.5 s; 12 Nov 2026, E17)
+# try 3 (24/2/16) took 0.34 s in the sim -> 8 of 16 steps
 # horizon 12 (0.6 s) until 2026-11-09; braking from 2.6 m/s takes ~0.6 s, so the plan now looks 1 s ahead
                                                         # were fixed prefix; fewer predictor calls = faster plans
 STEP = 0.05                     # s between two frames, like the training data
@@ -113,6 +119,9 @@ encoder.load_state_dict(torch.load(f"{RUNS_DIR}/{MODEL}/encoder.pt", map_locatio
 predictor.load_state_dict(torch.load(f"{RUNS_DIR}/{MODEL}/predictor.pt", map_location=PLAN_DEVICE))
 encoder.eval(), predictor.eval()
 heads = load_heads(MODEL, PLAN_DEVICE, HEADS_KIND)
+if cem.W_VALUE > 0:             # set WM2_COST=...,W_VALUE=1.0: the value head (wm2/value.py) judges where a plan ends
+    from wm2.value import load_value
+    cem.VALUE = load_value(MODEL, PLAN_DEVICE, os.environ.get("WM2_VALUE_FILE", "value.pt"))
 ROLL = GraphRollout(predictor) if PLAN_DEVICE == "cuda" else None      # None: model.rollout on the CPU
 # first GPU drive (plan 41 ms): 0 crashes but gas 0 for 36% of the time, laps 26 s. Re-planning every 40 ms, the car
 # only ever drives the first step of "brake 3 steps, then gas". WM2_PLAN_EVERY = min. seconds between plan starts
@@ -307,7 +316,7 @@ def start_log(path):
                      "crashes", "plan_ms", "lap_count", "last_lap", "best_lap"])
 
 
-trip = {"number": 0, "start": None, "noise": None}       # explore mode: the trip being recorded
+trip = {"number": 0, "start": None, "noise": None, "push": None}   # explore mode: the trip being recorded
 
 
 def next_trip_number():
@@ -319,7 +328,7 @@ def next_trip_number():
 def new_trip():
     # a new trip: a new gas ceiling for the planner, an empty recorder
     recorder.new_episod()
-    trip["start"], trip["noise"] = None, None
+    trip["start"], trip["noise"], trip["push"] = None, None, None
     with lock:
         shared["gas_top"] = random.choice(EXPLORE_GAS)
 
@@ -342,7 +351,15 @@ def end_trip(reason):
 
 
 def explore_action(action, now):
-    # the planner's action (model units) -> the action really sent, and the mode ("self" or "explore")
+    # the planner's action (model units) -> the action really sent, and the mode ("self", "explore" or "push")
+    if PUSH:
+        if trip["push"] is None:
+            trip["push"] = new_push_state(now, random)
+        trip["push"], side = push_steer(trip["push"], now, random)
+        if side is not None:
+            sent = action.clone()
+            sent[1] = side
+            return sent, "push"
     noise = trip["noise"]
     if noise is not None and now >= noise[2]:
         noise = trip["noise"] = None
